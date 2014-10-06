@@ -85,7 +85,7 @@ void Object::_InitValues()
     m_objectUpdated = false;
 }
 
-void Object::_Create(uint32 guidlow, uint32 entry, HighGuid guidhigh)
+void Object::_Create(uint32 guidlow, uint32 entry, GuidType guidhigh)
 {
     if (!m_uint32Values)
         _InitValues();
@@ -132,22 +132,22 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     if (target == this)                                     // building packet for yourself
         updateFlags |= UPDATEFLAG_SELF;
 
-    switch (GetObjectGuid().GetHigh())
+    switch (GetObjectGuid().GetType())
     {
-        case HIGHGUID_PLAYER:
-        case HIGHGUID_PET:
-        case HIGHGUID_CORPSE:
-        case HIGHGUID_DYNAMICOBJECT:
+        case GUIDTYPE_PLAYER:
+        case GUIDTYPE_PET:
+        case GUIDTYPE_CORPSE:
+        case GUIDTYPE_DYNAMICOBJECT:
             updatetype = UPDATETYPE_CREATE_OBJECT2;
             break;
-        case HIGHGUID_UNIT:
+        case GUIDTYPE_CREATURE:
         {
             Creature* creature = (Creature*)this;
             if (creature->IsTemporarySummon() && ((TemporarySummon*)this)->GetSummonerGuid().IsPlayer())
                 updatetype = UPDATETYPE_CREATE_OBJECT2;
             break;
         }
-        case HIGHGUID_GAMEOBJECT:
+        case GUIDTYPE_GAMEOBJECT:
         {
             if (((GameObject*)this)->GetOwnerGuid().IsPlayer())
                 updatetype = UPDATETYPE_CREATE_OBJECT2;
@@ -1095,7 +1095,7 @@ void WorldObject::CleanupsBeforeDelete()
     RemoveFromWorld();
 }
 
-void WorldObject::_Create(uint32 guidlow, HighGuid guidhigh, uint32 phaseMask)
+void WorldObject::_Create(uint32 guidlow, GuidType guidhigh, uint32 phaseMask)
 {
     Object::_Create(guidlow, 0, guidhigh);
     m_phaseMask = phaseMask;
@@ -1660,14 +1660,14 @@ void WorldObject::SendMessageToSetExcept(WorldPacket* data, Player const* skippe
 
 void WorldObject::SendObjectDeSpawnAnim(ObjectGuid guid)
 {
-    WorldPacket data(SMSG_GAMEOBJECT_DESPAWN_ANIM, 8);
+    WorldPacket data(SMSG_GAME_OBJECT_DESPAWN, 8);
     data << ObjectGuid(guid);
     SendMessageToSet(&data, true);
 }
 
 void WorldObject::SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId /*= 0*/)
 {
-    WorldPacket data(SMSG_GAMEOBJECT_CUSTOM_ANIM, 8 + 4);
+    WorldPacket data(SMSG_GAME_OBJECT_CUSTOM_ANIM, 8 + 4);
     data << ObjectGuid(guid);
     data << uint32(animId);
     SendMessageToSet(&data, true);
@@ -1713,7 +1713,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     if (x == 0.0f && y == 0.0f && z == 0.0f)
         pos = CreatureCreatePos(this, GetOrientation(), CONTACT_DISTANCE, ang);
 
-    if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo, team))
+    if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(cinfo->GetGuidType()), pos, cinfo, team))
     {
         delete pCreature;
         return NULL;

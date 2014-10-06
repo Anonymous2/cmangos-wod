@@ -785,7 +785,7 @@ bool ChatHandler::HandleDebugSetItemValueCommand(char* args)
     if (!valStr)
         return false;
 
-    Item* item = m_session->GetPlayer()->GetItemByGuid(ObjectGuid(HIGHGUID_ITEM, guid));
+    Item* item = m_session->GetPlayer()->GetItemByGuid(ObjectGuid(GUIDTYPE_ITEM, guid));
     if (!item)
         return false;
 
@@ -893,7 +893,7 @@ bool ChatHandler::HandleDebugGetItemValueCommand(char* args)
     if (!typeStr && *args)                                  // optional arg but check format fail case
         return false;
 
-    Item* item = m_session->GetPlayer()->GetItemByGuid(ObjectGuid(HIGHGUID_ITEM, guid));
+    Item* item = m_session->GetPlayer()->GetItemByGuid(ObjectGuid(GUIDTYPE_ITEM, guid));
     if (!item)
         return false;
 
@@ -1018,7 +1018,7 @@ bool ChatHandler::HandleDebugModItemValueCommand(char* args)
     if (!valStr)
         return false;
 
-    Item* item = m_session->GetPlayer()->GetItemByGuid(ObjectGuid(HIGHGUID_ITEM, guid));
+    Item* item = m_session->GetPlayer()->GetItemByGuid(ObjectGuid(GUIDTYPE_ITEM, guid));
     if (!item)
         return false;
 

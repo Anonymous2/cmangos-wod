@@ -303,7 +303,7 @@ class BattleGround
 
         /* Battleground */
         // Get methods:
-        ObjectGuid GetObjectGuid() { return ObjectGuid(HIGHGUID_BATTLEGROUND, uint32(m_ArenaType), uint32(m_TypeID)); }
+        ObjectGuid GetObjectGuid() { return ObjectGuid(GUIDTYPE_PVPQUEUEGROUP, uint32(m_ArenaType), uint32(m_TypeID)); }
         char const* GetName() const         { return m_Name; }
         BattleGroundTypeId GetTypeID() const { return m_TypeID; }
         BattleGroundBracketId GetBracketId() const { return m_BracketId; }

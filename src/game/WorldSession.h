@@ -49,7 +49,8 @@ class GMTicket;
 class MovementInfo;
 class WorldSession;
 
-struct OpcodeHandler;
+struct ServerOpcodeHandler;
+struct ClientOpcodeHandler;
 
 enum AccountDataType
 {
@@ -409,7 +410,7 @@ class MANGOS_DLL_SPEC WorldSession
         void Handle_ServerSide(WorldPacket& recvPacket);    // sever side only, can't be accepted from client
         void Handle_Deprecated(WorldPacket& recvPacket);    // never used anymore by client
 
-        void HandleCharEnumOpcode(WorldPacket& recvPacket);
+        void HandleEnumChar(WorldPacket& recvPacket);
         void HandleCharDeleteOpcode(WorldPacket& recvPacket);
         void HandleCharCreateOpcode(WorldPacket& recvPacket);
         void HandlePlayerLoginOpcode(WorldPacket& recvPacket);
@@ -889,7 +890,7 @@ class MANGOS_DLL_SPEC WorldSession
         bool VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGuid const& guid) const;
         void HandleMoverRelocation(MovementInfo& movementInfo);
 
-        void ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket* packet);
+        void ExecuteOpcode(ClientOpcodeHandler const& opHandle, WorldPacket* packet);
 
         // logging helper
         void LogUnexpectedOpcode(WorldPacket* packet, const char* reason);

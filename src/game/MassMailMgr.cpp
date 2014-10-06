@@ -87,7 +87,7 @@ void MassMailMgr::Update(bool sendall /*= false*/)
             uint32 receiver_lowguid = *task.m_receivers.begin();
             task.m_receivers.erase(task.m_receivers.begin());
 
-            ObjectGuid receiver_guid = ObjectGuid(HIGHGUID_PLAYER, receiver_lowguid);
+            ObjectGuid receiver_guid = ObjectGuid(GUIDTYPE_PLAYER, receiver_lowguid);
             Player* receiver = sObjectMgr.GetPlayer(receiver_guid);
 
             // last case. can be just send

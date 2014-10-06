@@ -93,7 +93,7 @@ void WorldSession::SendUpdateTrade(bool trader_state /*= true*/)
 {
     TradeData* view_trade = trader_state ? _player->GetTradeData()->GetTraderData() : _player->GetTradeData();
 
-    WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, (100));    // guess size
+    WorldPacket data(SMSG_TRADE_STATUS, (100));    // guess size
     data << uint32(0);                                      // added in 2.4.0, this value must be equal to value from TRADE_STATUS_OPEN_WINDOW status packet (different value for different players to block multiple trades?)
     data << uint32(0);                                      // unk 2
     data << uint64(view_trade->GetMoney());                 // trader gold

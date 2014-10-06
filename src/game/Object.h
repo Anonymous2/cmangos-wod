@@ -364,7 +364,7 @@ class MANGOS_DLL_SPEC Object
         Object();
 
         void _InitValues();
-        void _Create(uint32 guidlow, uint32 entry, HighGuid guidhigh);
+        void _Create(uint32 guidlow, uint32 entry, GuidType guidhigh);
 
         virtual void _SetUpdateBits(UpdateMask* updateMask, Player* target) const;
 
@@ -439,7 +439,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         virtual void Update(uint32 /*update_diff*/, uint32 /*time_diff*/) {}
 
-        void _Create(uint32 guidlow, HighGuid guidhigh, uint32 phaseMask);
+        void _Create(uint32 guidlow, GuidType guidhigh, uint32 phaseMask);
 
         TransportInfo* GetTransportInfo() const { return m_transportInfo; }
         bool IsBoarded() const { return m_transportInfo != NULL; }

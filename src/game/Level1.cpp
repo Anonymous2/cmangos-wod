@@ -140,7 +140,7 @@ bool ChatHandler::HandleNotifyCommand(char* args)
     std::string str = GetMangosString(LANG_GLOBAL_NOTIFY);
     str += args;
 
-    WorldPacket data(SMSG_NOTIFICATION, str.size() + 1);
+    WorldPacket data(SMSG_PRINT_NOTIFICATION, str.size() + 1);
     data.WriteBits(str.length(), 13);
     data.FlushBits();
     data.append(str.c_str(), str.length());

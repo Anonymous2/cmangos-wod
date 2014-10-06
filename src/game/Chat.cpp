@@ -2848,7 +2848,7 @@ GameObject* ChatHandler::GetGameObjectWithGuid(uint32 lowguid, uint32 entry)
 
     Player* pl = m_session->GetPlayer();
 
-    return pl->GetMap()->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, entry, lowguid));
+    return pl->GetMap()->GetGameObject(ObjectGuid(GUIDTYPE_GAMEOBJECT, entry, lowguid));
 }
 
 enum SpellLinkType
@@ -3001,7 +3001,7 @@ ObjectGuid ChatHandler::ExtractGuidFromLink(char** text)
                 return ObjectGuid();
 
             if (GameObjectData const* data = sObjectMgr.GetGOData(lowguid))
-                return ObjectGuid(HIGHGUID_GAMEOBJECT, data->id, lowguid);
+                return ObjectGuid(GUIDTYPE_GAMEOBJECT, data->id, lowguid);
             else
                 return ObjectGuid();
         }
@@ -3624,7 +3624,7 @@ void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const
     bool isGM = chatTag & CHAT_TAG_GM;
     bool isAchievement = false;
 
-    data.Initialize(isGM ? SMSG_GM_MESSAGECHAT : SMSG_MESSAGECHAT);
+    data.Initialize(SMSG_CHAT);
     data << uint8(msgtype);
     data << uint32(language);
     data << ObjectGuid(senderGuid);

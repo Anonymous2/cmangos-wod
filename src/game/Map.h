@@ -257,7 +257,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         }
 
         // DynObjects currently
-        uint32 GenerateLocalLowGuid(HighGuid guidhigh);
+        uint32 GenerateLocalLowGuid(GuidType guidhigh);
 
         // get corresponding TerrainData object for this particular map
         const TerrainInfo* GetTerrain() const { return m_TerrainData; }
@@ -361,11 +361,11 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         uint32 i_script_id;
 
         // Map local low guid counters
-        ObjectGuidGenerator<HIGHGUID_UNIT> m_CreatureGuids;
-        ObjectGuidGenerator<HIGHGUID_GAMEOBJECT> m_GameObjectGuids;
-        ObjectGuidGenerator<HIGHGUID_DYNAMICOBJECT> m_DynObjectGuids;
-        ObjectGuidGenerator<HIGHGUID_PET> m_PetGuids;
-        ObjectGuidGenerator<HIGHGUID_VEHICLE> m_VehicleGuids;
+        ObjectGuidGenerator<GUIDTYPE_CREATURE> m_CreatureGuids;
+        ObjectGuidGenerator<GUIDTYPE_GAMEOBJECT> m_GameObjectGuids;
+        ObjectGuidGenerator<GUIDTYPE_DYNAMICOBJECT> m_DynObjectGuids;
+        ObjectGuidGenerator<GUIDTYPE_PET> m_PetGuids;
+        ObjectGuidGenerator<GUIDTYPE_VEHICLE> m_VehicleGuids;
 
         // Type specific code for add/remove to/from grid
         template<class T>

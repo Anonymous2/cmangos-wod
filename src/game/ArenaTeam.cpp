@@ -193,7 +193,7 @@ bool ArenaTeam::LoadArenaTeamFromDB(QueryResult* arenaTeamDataResult)
 
     m_TeamId             = fields[0].GetUInt32();
     m_Name               = fields[1].GetCppString();
-    m_CaptainGuid        = ObjectGuid(HIGHGUID_PLAYER, fields[2].GetUInt32());
+    m_CaptainGuid        = ObjectGuid(GUIDTYPE_PLAYER, fields[2].GetUInt32());
     m_Type               = ArenaType(fields[3].GetUInt32());
 
     if (!IsArenaTypeValid(m_Type))
@@ -242,7 +242,7 @@ bool ArenaTeam::LoadMembersFromDB(QueryResult* arenaTeamMembersResult)
             break;
 
         ArenaTeamMember newmember;
-        newmember.guid            = ObjectGuid(HIGHGUID_PLAYER, fields[1].GetUInt32());
+        newmember.guid            = ObjectGuid(GUIDTYPE_PLAYER, fields[1].GetUInt32());
         newmember.games_week      = fields[2].GetUInt32();
         newmember.wins_week       = fields[3].GetUInt32();
         newmember.games_season    = fields[4].GetUInt32();
@@ -349,7 +349,7 @@ void ArenaTeam::Roster(WorldSession* session)
 
     uint8 unk308 = 0;
 
-    WorldPacket data(SMSG_ARENA_TEAM_ROSTER, 100);
+    /*WorldPacket data(SMSG_ARENA_TEAM_ROSTER, 100);
     data << uint32(GetId());                                // team id
     data << uint8(unk308);                                  // 308 unknown value but affect packet structure
     data << uint32(GetMembersSize());                       // members count
@@ -378,12 +378,12 @@ void ArenaTeam::Roster(WorldSession* session)
     }
 
     session->SendPacket(&data);
-    DEBUG_LOG("WORLD: Sent SMSG_ARENA_TEAM_ROSTER");
+    DEBUG_LOG("WORLD: Sent SMSG_ARENA_TEAM_ROSTER");*/
 }
 
 void ArenaTeam::Query(WorldSession* session)
 {
-    WorldPacket data(SMSG_ARENA_TEAM_QUERY_RESPONSE, 4 * 7 + GetName().size() + 1);
+    /*WorldPacket data(SMSG_ARENA_TEAM_QUERY_RESPONSE, 4 * 7 + GetName().size() + 1);
     data << uint32(GetId());                                // team id
     data << GetName();                                      // team name
     data << uint32(GetType());                              // arena team type (2=2x2, 3=3x3 or 5=5x5)
@@ -393,12 +393,12 @@ void ArenaTeam::Query(WorldSession* session)
     data << uint32(m_BorderStyle);                          // border style
     data << uint32(m_BorderColor);                          // border color
     session->SendPacket(&data);
-    DEBUG_LOG("WORLD: Sent SMSG_ARENA_TEAM_QUERY_RESPONSE");
+    DEBUG_LOG("WORLD: Sent SMSG_ARENA_TEAM_QUERY_RESPONSE");*/
 }
 
 void ArenaTeam::Stats(WorldSession* session)
 {
-    WorldPacket data(SMSG_ARENA_TEAM_STATS, 4 * 7);
+    /*WorldPacket data(SMSG_ARENA_TEAM_STATS, 4 * 7);
     data << uint32(GetId());                                // team id
     data << uint32(m_stats.rating);                         // rating
     data << uint32(m_stats.games_week);                     // games this week
@@ -406,7 +406,7 @@ void ArenaTeam::Stats(WorldSession* session)
     data << uint32(m_stats.games_season);                   // played this season
     data << uint32(m_stats.wins_season);                    // wins this season
     data << uint32(m_stats.rank);                           // rank
-    session->SendPacket(&data);
+    session->SendPacket(&data);*/
 }
 
 void ArenaTeam::NotifyStatsChanged()
@@ -427,7 +427,7 @@ void ArenaTeam::InspectStats(WorldSession* session, ObjectGuid guid)
     if (!member)
         return;
 
-    WorldPacket data(MSG_INSPECT_ARENA_TEAMS, 8 + 1 + 4 * 6);
+    /*WorldPacket data(MSG_INSPECT_ARENA_TEAMS, 8 + 1 + 4 * 6);
     data << guid;                                           // player guid
     data << uint8(GetSlot());                               // slot (0...2)
     data << uint32(GetId());                                // arena team id
@@ -436,7 +436,7 @@ void ArenaTeam::InspectStats(WorldSession* session, ObjectGuid guid)
     data << uint32(m_stats.wins_season);                    // season wins
     data << uint32(member->games_season);                   // played (count of all games, that the inspected member participated...)
     data << uint32(member->personal_rating);                // personal rating
-    session->SendPacket(&data);
+    session->SendPacket(&data);*/
 }
 
 void ArenaTeam::SetEmblem(uint32 backgroundColor, uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor)
@@ -498,7 +498,7 @@ void ArenaTeam::BroadcastEvent(ArenaTeamEvents event, ObjectGuid guid, char cons
 {
     uint8 strCount = !str1 ? 0 : (!str2 ? 1 : (!str3 ? 2 : 3));
 
-    WorldPacket data(SMSG_ARENA_TEAM_EVENT, 1 + 1 + 1 * strCount + (!guid ? 0 : 8));
+    /*WorldPacket data(SMSG_ARENA_TEAM_EVENT, 1 + 1 + 1 * strCount + (!guid ? 0 : 8));
     data << uint8(event);
     data << uint8(strCount);
 
@@ -521,7 +521,7 @@ void ArenaTeam::BroadcastEvent(ArenaTeamEvents event, ObjectGuid guid, char cons
 
     BroadcastPacket(&data);
 
-    DEBUG_LOG("WORLD: Sent SMSG_ARENA_TEAM_EVENT");
+    DEBUG_LOG("WORLD: Sent SMSG_ARENA_TEAM_EVENT");*/
 }
 
 uint8 ArenaTeam::GetSlotByType(ArenaType type)
@@ -737,7 +737,7 @@ bool ArenaTeam::IsFighting() const
 // add new arena event to all already connected team members
 void ArenaTeam::MassInviteToEvent(WorldSession* session)
 {
-    WorldPacket data(SMSG_CALENDAR_ARENA_TEAM);
+    /*WorldPacket data(SMSG_CALENDAR_ARENA_TEAM);
 
     data << uint32(m_members.size());
 
@@ -751,5 +751,5 @@ void ArenaTeam::MassInviteToEvent(WorldSession* session)
             data << uint8(level);
         }
     }
-    session->SendPacket(&data);
+    session->SendPacket(&data);*/
 }

@@ -273,7 +273,7 @@ bool Guild::LoadGuildFromDB(QueryResult* guildDataResult)
 
     m_Id              = fields[0].GetUInt32();
     m_Name            = fields[1].GetCppString();
-    m_LeaderGuid      = ObjectGuid(HIGHGUID_PLAYER, fields[2].GetUInt32());
+    m_LeaderGuid      = ObjectGuid(GUIDTYPE_PLAYER, fields[2].GetUInt32());
     m_EmblemStyle     = fields[3].GetUInt32();
     m_EmblemColor     = fields[4].GetUInt32();
     m_BorderStyle     = fields[5].GetUInt32();
@@ -423,7 +423,7 @@ bool Guild::LoadMembersFromDB(QueryResult* guildMembersResult)
 
         MemberSlot newmember;
         uint32 lowguid = fields[1].GetUInt32();
-        newmember.guid = ObjectGuid(HIGHGUID_PLAYER, lowguid);
+        newmember.guid = ObjectGuid(GUIDTYPE_PLAYER, lowguid);
         newmember.RankId = fields[2].GetUInt32();
         // don't allow member to have not existing rank!
         if (newmember.RankId >= m_Ranks.size())
@@ -521,7 +521,7 @@ bool Guild::DelMember(ObjectGuid guid, bool isDisbanding)
             if (!best || best->RankId > i->second.RankId)
             {
                 best = &(i->second);
-                newLeaderGUID = ObjectGuid(HIGHGUID_PLAYER, i->first);
+                newLeaderGUID = ObjectGuid(GUIDTYPE_PLAYER, i->first);
             }
         }
 
@@ -570,7 +570,7 @@ void Guild::BroadcastToGuild(WorldSession* session, const std::string& msg, uint
 
         for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
         {
-            Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+            Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(GUIDTYPE_PLAYER, itr->first));
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_GCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetObjectGuid()))
                 pl->GetSession()->SendPacket(&data);
@@ -587,7 +587,7 @@ void Guild::BroadcastAddonToGuild(WorldSession* session, const std::string& msg,
 
         for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
         {
-            Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+            Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(GUIDTYPE_PLAYER, itr->first));
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_GCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetObjectGuid()))
                 pl->GetSession()->SendPacket(&data);
@@ -604,7 +604,7 @@ void Guild::BroadcastToOfficers(WorldSession* session, const std::string& msg, u
             WorldPacket data;
             ChatHandler::BuildChatPacket(data, CHAT_MSG_OFFICER, msg.c_str(), Language(language), session->GetPlayer()->GetChatTag(), session->GetPlayer()->GetObjectGuid(), session->GetPlayer()->GetName());
 
-            Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+            Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(GUIDTYPE_PLAYER, itr->first));
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_OFFCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetObjectGuid()))
                 pl->GetSession()->SendPacket(&data);
@@ -621,7 +621,7 @@ void Guild::BroadcastAddonToOfficers(WorldSession* session, const std::string& m
             WorldPacket data;
             ChatHandler::BuildChatPacket(data, CHAT_MSG_OFFICER, msg.c_str(), LANG_ADDON, CHAT_TAG_NONE, ObjectGuid(), NULL, ObjectGuid(), NULL, NULL, 0, prefix.c_str());
 
-            Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+            Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(GUIDTYPE_PLAYER, itr->first));
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_OFFCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetObjectGuid()))
                 pl->GetSession()->SendPacket(&data);
@@ -633,7 +633,7 @@ void Guild::BroadcastPacket(WorldPacket* packet)
 {
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        Player* player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+        Player* player = ObjectAccessor::FindPlayer(ObjectGuid(GUIDTYPE_PLAYER, itr->first));
         if (player)
             player->GetSession()->SendPacket(packet);
     }
@@ -645,7 +645,7 @@ void Guild::BroadcastPacketToRank(WorldPacket* packet, uint32 rankId)
     {
         if (itr->second.RankId == rankId)
         {
-            Player* player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+            Player* player = ObjectAccessor::FindPlayer(ObjectGuid(GUIDTYPE_PLAYER, itr->first));
             if (player)
                 player->GetSession()->SendPacket(packet);
         }
@@ -657,7 +657,7 @@ void Guild::MassInviteToEvent(WorldSession* session, uint32 minLevel, uint32 max
 {
     uint32 count = 0;
 
-    WorldPacket data(SMSG_CALENDAR_FILTER_GUILD);
+    WorldPacket data(SMSG_CALENDAR_EVENT_INVITE);
     data << uint32(count); // count placeholder
 
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
@@ -817,7 +817,7 @@ void Guild::Disband()
     while (!members.empty())
     {
         MemberList::const_iterator itr = members.begin();
-        DelMember(ObjectGuid(HIGHGUID_PLAYER, itr->first), true);
+        DelMember(ObjectGuid(GUIDTYPE_PLAYER, itr->first), true);
     }
 
     CharacterDatabase.BeginTransaction();
@@ -848,7 +848,7 @@ void Guild::Roster(WorldSession* session /*= NULL*/)
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
         MemberSlot const member = itr->second;
-        Player* player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+        Player* player = ObjectAccessor::FindPlayer(ObjectGuid(GUIDTYPE_PLAYER, itr->first));
 
         ObjectGuid guid = member.guid;
         data.WriteGuidMask<3, 4>(guid);
@@ -926,7 +926,7 @@ void Guild::Roster(WorldSession* session /*= NULL*/)
 
 void Guild::Query(WorldSession* session)
 {
-    WorldPacket data(SMSG_GUILD_QUERY_RESPONSE, 8 * 32 + 200); // we can only guess size
+    WorldPacket data(SMSG_QUERY_GUILD_INFO_RESPONSE, 8 * 32 + 200); // we can only guess size
 
     data << GetObjectGuid();
     data << m_Name;
@@ -970,7 +970,7 @@ void Guild::Query(WorldSession* session)
 
 void Guild::QueryRanks(WorldSession* session)
 {
-    WorldPacket data(SMSG_GUILD_QUERY_RANKS_RESULT, (4 * 2 * 8 + 4 * 3 + 1) * m_Ranks.size()); // we can only guess size
+    WorldPacket data(SMSG_GUILD_RANKS, (4 * 2 * 8 + 4 * 3 + 1) * m_Ranks.size()); // we can only guess size
 
     data.WriteBits(m_Ranks.size(), 18);
 
@@ -1035,8 +1035,9 @@ uint32 Guild::GetAccountsNumber()
 // Display guild eventlog
 void Guild::DisplayGuildEventLog(WorldSession* session)
 {
+    // REWRITE
     // Sending result
-    ByteBuffer buffer;
+    /*ByteBuffer buffer;
     WorldPacket data(SMSG_GUILD_EVENT_LOG, 0);
     // count, max count == 100
     data.WriteBits(m_GuildEventLog.size(), 23);
@@ -1048,7 +1049,7 @@ void Guild::DisplayGuildEventLog(WorldSession* session)
         data.append(buffer);
     }
     session->SendPacket(&data);
-    DEBUG_LOG("WORLD: Sent (SMSG_GUILD_EVENT_LOG)");
+    DEBUG_LOG("WORLD: Sent (SMSG_GUILD_EVENT_LOG)");*/
 }
 
 // Load guild eventlog from DB
@@ -1125,7 +1126,7 @@ void Guild::DisplayGuildBankContent(WorldSession* session, uint8 TabId)
     if (!IsMemberHaveRights(session->GetPlayer()->GetGUIDLow(), TabId, GUILD_BANK_RIGHT_VIEW_TAB))
         return;
 
-    WorldPacket data(SMSG_GUILD_BANK_LIST, 1200);
+    WorldPacket data(SMSG_GUILD_BANK_QUERY_RESULTS, 1200);
     ByteBuffer buffer;
     data.WriteBit(0);
     uint32 itemCount = 0;
@@ -1153,7 +1154,7 @@ void Guild::DisplayGuildBankContent(WorldSession* session, uint8 TabId)
 
 void Guild::DisplayGuildBankMoneyUpdate(WorldSession* session)
 {
-    WorldPacket data(SMSG_GUILD_BANK_LIST, 8 + 1 + 4 + 1 + 1);
+    WorldPacket data(SMSG_GUILD_BANK_QUERY_RESULTS, 8 + 1 + 4 + 1 + 1);
     data.WriteBit(0);
     data.WriteBits(0, 20);          // not send items
     data.WriteBits(0, 22);          // Tell that there's no tab info in this packet
@@ -1172,7 +1173,7 @@ void Guild::DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2)
     GuildBankTab const* tab = m_TabListMap[TabId];
 
     ByteBuffer buffer;
-    WorldPacket data(SMSG_GUILD_BANK_LIST, 1200);
+    WorldPacket data(SMSG_GUILD_BANK_QUERY_RESULTS, 1200);
 
     data.WriteBit(0);
     if (slot2 == -1)                                        // single item in slot1
@@ -1202,7 +1203,7 @@ void Guild::DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2)
 
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        Player* player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+        Player* player = ObjectAccessor::FindPlayer(ObjectGuid(GUIDTYPE_PLAYER, itr->first));
         if (!player)
             continue;
 
@@ -1222,7 +1223,7 @@ void Guild::DisplayGuildBankContentUpdate(uint8 TabId, GuildItemPosCountVec cons
     GuildBankTab const* tab = m_TabListMap[TabId];
 
     ByteBuffer buffer;
-    WorldPacket data(SMSG_GUILD_BANK_LIST, 1200);
+    WorldPacket data(SMSG_GUILD_BANK_QUERY_RESULTS, 1200);
     data.WriteBit(0);
     data.WriteBits(slots.size(), 20);                       // updates count
     data.WriteBits(0, 22);                                  // Tell client that there's no tab info in this packet
@@ -1241,7 +1242,7 @@ void Guild::DisplayGuildBankContentUpdate(uint8 TabId, GuildItemPosCountVec cons
 
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        Player* player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+        Player* player = ObjectAccessor::FindPlayer(ObjectGuid(GUIDTYPE_PLAYER, itr->first));
         if (!player)
             continue;
 
@@ -1268,7 +1269,7 @@ Item* Guild::GetItem(uint8 TabId, uint8 SlotId)
 
 void Guild::DisplayGuildBankTabsInfo(WorldSession* session)
 {
-    WorldPacket data(SMSG_GUILD_BANK_LIST, 500);
+    WorldPacket data(SMSG_GUILD_BANK_QUERY_RESULTS, 500);
     data.WriteBit(0);
     data.WriteBits(0, 20);                                  // Do not send tab content
     data.WriteBits(GetPurchasedTabs(), 22);                 // here is the number of tabs
@@ -1424,10 +1425,10 @@ void Guild::LoadGuildBankFromDB()
 
 void Guild::SendMoneyInfo(WorldSession* session, uint32 LowGuid)
 {
-    WorldPacket data(SMSG_GUILD_BANK_MONEY_WITHDRAWN, 8);
+    WorldPacket data(SMSG_GUILD_BANK_REMAINING_WITHDRAW_MONEY, 8);
     data << uint64(GetMemberMoneyWithdrawRem(LowGuid));
     session->SendPacket(&data);
-    DEBUG_LOG("WORLD: Sent SMSG_GUILD_BANK_MONEY_WITHDRAWN");
+    DEBUG_LOG("WORLD: Sent SMSG_GUILD_BANK_REMAINING_WITHDRAW_MONEY");
 }
 
 bool Guild::MemberMoneyWithdraw(uint64 amount, uint32 LowGuid)
@@ -1743,7 +1744,7 @@ void Guild::DisplayGuildBankLogs(WorldSession* session, uint8 TabId)
 
     ByteBuffer buffer;
     bool hasCashFlow = GetLevel() >= 5 && TabId == GUILD_BANK_MAX_TABS; // has Cash Flow perk
-    WorldPacket data(SMSG_GUILD_BANK_LOG_QUERY_RESULT, m_GuildBankEventLog_Money.size() * (4 * 4 + 1) + 1 + 1);
+    WorldPacket data(SMSG_GUILD_BANK_LOG_QUERY_RESULTS, m_GuildBankEventLog_Money.size() * (4 * 4 + 1) + 1 + 1);
     data.WriteBit(hasCashFlow);
 
     if (TabId == GUILD_BANK_MAX_TABS)
@@ -2110,7 +2111,7 @@ void Guild::SendGuildBankTabText(WorldSession* session, uint8 TabId)
 {
     GuildBankTab const* tab = m_TabListMap[TabId];
 
-    WorldPacket data(SMSG_GUILD_BANK_TEXT, 1 + tab->Text.size() + 1);
+    WorldPacket data(SMSG_GUILD_BANK_TEXT_QUERY_RESULT, 1 + tab->Text.size() + 1);
     data.WriteBits(tab->Text.length(), 14);
     data << uint32(TabId);
     data.WriteStringData(tab->Text);
@@ -2545,7 +2546,8 @@ void Guild::BroadcastEvent(GuildEvents event, ObjectGuid guid, char const* str1 
 {
     uint8 strCount = !str1 ? 0 : (!str2 ? 1 : (!str3 ? 2 : 3));
 
-    WorldPacket data(SMSG_GUILD_EVENT, 1 + 1 + 1 * strCount + (!guid ? 0 : 8));
+    // Different opcodes used now
+    /*WorldPacket data(SMSG_GUILD_EVENT, 1 + 1 + 1 * strCount + (!guid ? 0 : 8));
     data << uint8(event);
     data << uint8(strCount);
 
@@ -2568,7 +2570,7 @@ void Guild::BroadcastEvent(GuildEvents event, ObjectGuid guid, char const* str1 
 
     BroadcastPacket(&data);
 
-    DEBUG_LOG("WORLD: Sent SMSG_GUILD_EVENT");
+    DEBUG_LOG("WORLD: Sent SMSG_GUILD_EVENT");*/
 }
 
 void Guild::DeleteGuildBankItems(bool alsoInDB /*= false*/)
@@ -2604,9 +2606,9 @@ bool GuildItemPosCount::isContainedIn(GuildItemPosCountVec const& vec) const
 void GuildEventLogEntry::WriteData(WorldPacket& data, ByteBuffer& buffer)
 {
     // Player 1
-    ObjectGuid guid1 = ObjectGuid(HIGHGUID_PLAYER, PlayerGuid1);
+    ObjectGuid guid1 = ObjectGuid(GUIDTYPE_PLAYER, PlayerGuid1);
     // Player 2 not for left/join guild events
-    ObjectGuid guid2 = ObjectGuid(HIGHGUID_PLAYER, PlayerGuid2);
+    ObjectGuid guid2 = ObjectGuid(GUIDTYPE_PLAYER, PlayerGuid2);
     data.WriteGuidMask<2, 4>(guid1);
     data.WriteGuidMask<7, 6>(guid2);
     data.WriteGuidMask<3>(guid1);
@@ -2639,7 +2641,7 @@ void GuildEventLogEntry::WriteData(WorldPacket& data, ByteBuffer& buffer)
 
 void GuildBankEventLogEntry::WriteData(WorldPacket& data, ByteBuffer& buffer)
 {
-    ObjectGuid logGuid = ObjectGuid(HIGHGUID_PLAYER, PlayerGuid);
+    ObjectGuid logGuid = ObjectGuid(GUIDTYPE_PLAYER, PlayerGuid);
 
     bool hasItem = EventType == GUILD_BANK_LOG_DEPOSIT_ITEM || EventType == GUILD_BANK_LOG_WITHDRAW_ITEM ||
         EventType == GUILD_BANK_LOG_MOVE_ITEM || EventType == GUILD_BANK_LOG_MOVE_ITEM2;

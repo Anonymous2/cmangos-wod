@@ -1754,7 +1754,7 @@ ObjectGuid ObjectMgr::GetPlayerGuidByName(std::string name) const
     QueryResult* result = CharacterDatabase.PQuery("SELECT guid FROM characters WHERE name = '%s'", name.c_str());
     if (result)
     {
-        guid = ObjectGuid(HIGHGUID_PLAYER, (*result)[0].GetUInt32());
+        guid = ObjectGuid(GUIDTYPE_PLAYER, (*result)[0].GetUInt32());
 
         delete result;
     }
@@ -3576,7 +3576,7 @@ void ObjectMgr::LoadGroups()
             ++count;
 
             uint32 memberGuidlow = fields[0].GetUInt32();
-            ObjectGuid memberGuid = ObjectGuid(HIGHGUID_PLAYER, memberGuidlow);
+            ObjectGuid memberGuid = ObjectGuid(GUIDTYPE_PLAYER, memberGuidlow);
             bool   assistent     = fields[1].GetBool();
             uint8  subgroup      = fields[2].GetUInt8();
             uint32 groupId       = fields[3].GetUInt32();
@@ -5202,7 +5202,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
         m->messageID = fields[0].GetUInt32();
         m->messageType = fields[1].GetUInt8();
         m->sender = fields[2].GetUInt32();
-        m->receiverGuid = ObjectGuid(HIGHGUID_PLAYER, fields[3].GetUInt32());
+        m->receiverGuid = ObjectGuid(GUIDTYPE_PLAYER, fields[3].GetUInt32());
         bool has_items = fields[4].GetBool();
         m->expire_time = (time_t)fields[5].GetUInt64();
         m->deliver_time = 0;

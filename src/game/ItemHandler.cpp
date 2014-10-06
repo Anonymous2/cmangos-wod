@@ -294,12 +294,12 @@ void WorldSession::HandleReadItemOpcode(WorldPacket& recv_data)
         InventoryResult msg = _player->CanUseItem(pItem);
         if (msg == EQUIP_ERR_OK)
         {
-            data.Initialize(SMSG_READ_ITEM_OK, 8);
+            data.Initialize(SMSG_READ_ITEM_RESULT_OK, 8);
             DETAIL_LOG("STORAGE: Item page sent");
         }
         else
         {
-            data.Initialize(SMSG_READ_ITEM_FAILED, 8);
+            data.Initialize(SMSG_READ_ITEM_RESULT_FAILED, 8);
             DETAIL_LOG("STORAGE: Unable to read item");
             _player->SendEquipError(msg, pItem, NULL);
         }
@@ -681,7 +681,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
         }
     }
 
-    WorldPacket data(SMSG_LIST_INVENTORY, (8 + 3 + 1 + 1 + numitems * 8 * 4));
+    WorldPacket data(SMSG_VENDOR_INVENTORY, (8 + 3 + 1 + 1 + numitems * 8 * 4));
 
     data.WriteGuidMask<1, 0>(vendorguid);
     data.WriteBits(count, 21);
@@ -903,7 +903,7 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket& recv_data)
 
 void WorldSession::SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGuid, uint32 itemId, uint32 spellId)
 {
-    WorldPacket data(SMSG_ENCHANTMENTLOG, (8 + 8 + 4 + 4 + 1)); // last check 2.0.10
+    WorldPacket data(SMSG_ENCHANTMENT_LOG, (8 + 8 + 4 + 4 + 1)); // last check 2.0.10
     data << targetGuid.WriteAsPacked();
     data << casterGuid.WriteAsPacked();
     data << uint32(itemId);
@@ -1300,7 +1300,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket& recv_data)
 
     DEBUG_LOG("CMSG_ITEM_TEXT_QUERY item guid: %u", itemGuid.GetCounter());
 
-    WorldPacket data(SMSG_ITEM_TEXT_QUERY_RESPONSE, (4 + 10)); // guess size
+    WorldPacket data(SMSG_QUERY_ITEM_TEXT_RESPONSE, (4 + 10)); // guess size
 
     if (Item* item = _player->GetItemByGuid(itemGuid))
     {

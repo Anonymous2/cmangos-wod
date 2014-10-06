@@ -141,10 +141,10 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         return false;
     }
 
-    if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
-        Object::_Create(guidlow, 0, HIGHGUID_MO_TRANSPORT);
-    else
-        Object::_Create(guidlow, goinfo->id, HIGHGUID_GAMEOBJECT);
+    //if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
+    //    Object::_Create(guidlow, 0, GUIDTYPE_MO_TRANSPORT);
+    //else
+    Object::_Create(guidlow, goinfo->id, GUIDTYPE_GAMEOBJECT);
 
     m_goInfo = goinfo;
 
@@ -863,7 +863,7 @@ void GameObject::SummonLinkedTrapIfAny()
         return;
 
     GameObject* linkedGO = new GameObject;
-    if (!linkedGO->Create(GetMap()->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, GetMap(),
+    if (!linkedGO->Create(GetMap()->GenerateLocalLowGuid(GUIDTYPE_GAMEOBJECT), linkedEntry, GetMap(),
                           GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation()))
     {
         delete linkedGO;
@@ -1210,7 +1210,7 @@ void GameObject::Use(Unit* user)
 
                 if (info->goober.pageId)                    // show page...
                 {
-                    WorldPacket data(SMSG_GAMEOBJECT_PAGETEXT, 8);
+                    WorldPacket data(SMSG_PAGE_TEXT, 8);
                     data << ObjectGuid(GetObjectGuid());
                     player->GetSession()->SendPacket(&data);
                 }
@@ -1967,7 +1967,7 @@ struct AddGameObjectToRemoveListInMapsWorker
 
 void GameObject::AddToRemoveListInMaps(uint32 db_guid, GameObjectData const* data)
 {
-    AddGameObjectToRemoveListInMapsWorker worker(ObjectGuid(HIGHGUID_GAMEOBJECT, data->id, db_guid));
+    AddGameObjectToRemoveListInMapsWorker worker(ObjectGuid(GUIDTYPE_GAMEOBJECT, data->id, db_guid));
     sMapMgr.DoForAllMapsWithMapId(data->mapid, worker);
 }
 

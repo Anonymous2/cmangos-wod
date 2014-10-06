@@ -1703,7 +1703,7 @@ void Map::ScriptsProcess()
  * Note: This is function preferred if you sure that need player only placed at specific map
  *       This is not true for some spell cast targeting and most packet handlers
  *
- * @param guid must be player guid (HIGHGUID_PLAYER)
+ * @param guid must be player guid (GUIDTYPE_PLAYER)
  */
 Player* Map::GetPlayer(ObjectGuid guid)
 {
@@ -1714,7 +1714,7 @@ Player* Map::GetPlayer(ObjectGuid guid)
 /**
  * Function return creature (non-pet and then most summoned by spell creatures) that in world at CURRENT map
  *
- * @param guid must be creature or vehicle guid (HIGHGUID_UNIT HIGHGUID_VEHICLE)
+ * @param guid must be creature or vehicle guid (GUIDTYPE_CREATURE GUIDTYPE_VEHICLE)
  */
 Creature* Map::GetCreature(ObjectGuid guid)
 {
@@ -1724,7 +1724,7 @@ Creature* Map::GetCreature(ObjectGuid guid)
 /**
  * Function return pet that in world at CURRENT map
  *
- * @param guid must be pet guid (HIGHGUID_PET)
+ * @param guid must be pet guid (GUIDTYPE_PET)
  */
 Pet* Map::GetPet(ObjectGuid guid)
 {
@@ -1736,7 +1736,7 @@ Pet* Map::GetPet(ObjectGuid guid)
  *
  * Note: corpse can be NOT IN WORLD, so can't be used corpse->GetMap() without pre-check corpse->isInWorld()
  *
- * @param guid must be corpse guid (HIGHGUID_CORPSE)
+ * @param guid must be corpse guid (GUIDTYPE_CORPSE)
  */
 Corpse* Map::GetCorpse(ObjectGuid guid)
 {
@@ -1747,15 +1747,15 @@ Corpse* Map::GetCorpse(ObjectGuid guid)
 /**
  * Function return non-player unit object that in world at CURRENT map, so creature, or pet, or vehicle
  *
- * @param guid must be non-player unit guid (HIGHGUID_PET HIGHGUID_UNIT HIGHGUID_VEHICLE)
+ * @param guid must be non-player unit guid (GUIDTYPE_PET GUIDTYPE_CREATURE GUIDTYPE_VEHICLE)
  */
 Creature* Map::GetAnyTypeCreature(ObjectGuid guid)
 {
-    switch (guid.GetHigh())
+    switch (guid.GetType())
     {
-        case HIGHGUID_UNIT:
-        case HIGHGUID_VEHICLE:      return GetCreature(guid);
-        case HIGHGUID_PET:          return GetPet(guid);
+        case GUIDTYPE_CREATURE:
+        case GUIDTYPE_VEHICLE:      return GetCreature(guid);
+        case GUIDTYPE_PET:          return GetPet(guid);
         default:                    break;
     }
 
@@ -1765,7 +1765,7 @@ Creature* Map::GetAnyTypeCreature(ObjectGuid guid)
 /**
  * Function return gameobject that in world at CURRENT map
  *
- * @param guid must be gameobject guid (HIGHGUID_GAMEOBJECT)
+ * @param guid must be gameobject guid (GUIDTYPE_GAMEOBJECT)
  */
 GameObject* Map::GetGameObject(ObjectGuid guid)
 {
@@ -1775,7 +1775,7 @@ GameObject* Map::GetGameObject(ObjectGuid guid)
 /**
  * Function return dynamic object that in world at CURRENT map
  *
- * @param guid must be dynamic object guid (HIGHGUID_DYNAMICOBJECT)
+ * @param guid must be dynamic object guid (GUIDTYPE_DYNAMICOBJECT)
  */
 DynamicObject* Map::GetDynamicObject(ObjectGuid guid)
 {
@@ -1788,7 +1788,7 @@ DynamicObject* Map::GetDynamicObject(ObjectGuid guid)
  * Note: in case player guid not always expected need player at current map only.
  *       For example in spell casting can be expected any in world player targeting in some cases
  *
- * @param guid must be unit guid (HIGHGUID_PLAYER HIGHGUID_PET HIGHGUID_UNIT HIGHGUID_VEHICLE)
+ * @param guid must be unit guid (GUIDTYPE_PLAYER GUIDTYPE_PET GUIDTYPE_CREATURE GUIDTYPE_VEHICLE)
  */
 Unit* Map::GetUnit(ObjectGuid guid)
 {
@@ -1803,22 +1803,22 @@ Unit* Map::GetUnit(ObjectGuid guid)
  */
 WorldObject* Map::GetWorldObject(ObjectGuid guid)
 {
-    switch (guid.GetHigh())
+    switch (guid.GetType())
     {
-        case HIGHGUID_PLAYER:       return GetPlayer(guid);
-        case HIGHGUID_GAMEOBJECT:   return GetGameObject(guid);
-        case HIGHGUID_UNIT:
-        case HIGHGUID_VEHICLE:      return GetCreature(guid);
-        case HIGHGUID_PET:          return GetPet(guid);
-        case HIGHGUID_DYNAMICOBJECT: return GetDynamicObject(guid);
-        case HIGHGUID_CORPSE:
+        case GUIDTYPE_PLAYER:       return GetPlayer(guid);
+        case GUIDTYPE_GAMEOBJECT:   return GetGameObject(guid);
+        case GUIDTYPE_CREATURE:
+        case GUIDTYPE_VEHICLE:      return GetCreature(guid);
+        case GUIDTYPE_PET:          return GetPet(guid);
+        case GUIDTYPE_DYNAMICOBJECT: return GetDynamicObject(guid);
+        case GUIDTYPE_CORPSE:
         {
             // corpse special case, it can be not in world
             Corpse* corpse = GetCorpse(guid);
             return corpse && corpse->IsInWorld() ? corpse : NULL;
         }
-        case HIGHGUID_MO_TRANSPORT:
-        case HIGHGUID_TRANSPORT:
+        //case GUIDTYPE_MO_TRANSPORT:
+        case GUIDTYPE_TRANSPORT:
         default:                    break;
     }
 
@@ -1845,20 +1845,20 @@ void Map::SendObjectUpdates()
     }
 }
 
-uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
+uint32 Map::GenerateLocalLowGuid(GuidType guidhigh)
 {
     // TODO: for map local guid counters possible force reload map instead shutdown server at guid counter overflow
     switch (guidhigh)
     {
-        case HIGHGUID_UNIT:
+        case GUIDTYPE_CREATURE:
             return m_CreatureGuids.Generate();
-        case HIGHGUID_GAMEOBJECT:
+        case GUIDTYPE_GAMEOBJECT:
             return m_GameObjectGuids.Generate();
-        case HIGHGUID_DYNAMICOBJECT:
+        case GUIDTYPE_DYNAMICOBJECT:
             return m_DynObjectGuids.Generate();
-        case HIGHGUID_PET:
+        case GUIDTYPE_PET:
             return m_PetGuids.Generate();
-        case HIGHGUID_VEHICLE:
+        case GUIDTYPE_VEHICLE:
             return m_VehicleGuids.Generate();
         default:
             MANGOS_ASSERT(false);

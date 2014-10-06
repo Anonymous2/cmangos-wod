@@ -325,7 +325,7 @@ void WorldSession::SendPetNameQuery(ObjectGuid petguid, uint32 petnumber)
     Creature* pet = _player->GetMap()->GetAnyTypeCreature(petguid);
     if (!pet || !pet->GetCharmInfo() || pet->GetCharmInfo()->GetPetNumber() != petnumber)
     {
-        WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (4 + 1 + 4 + 1));
+        WorldPacket data(SMSG_QUERY_PET_NAME_RESPONSE, (4 + 1 + 4 + 1));
         data << uint32(petnumber);
         data << uint8(0);
         data << uint32(0);
@@ -343,7 +343,7 @@ void WorldSession::SendPetNameQuery(ObjectGuid petguid, uint32 petnumber)
         sObjectMgr.GetCreatureLocaleStrings(pet->GetEntry(), loc_idx, &name);
     }
 
-    WorldPacket data(SMSG_PET_NAME_QUERY_RESPONSE, (4 + 4 + strlen(name) + 1));
+    WorldPacket data(SMSG_QUERY_PET_NAME_RESPONSE, (4 + 4 + strlen(name) + 1));
     data << uint32(petnumber);
     data << name;
     data << uint32(pet->GetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP));

@@ -379,7 +379,7 @@ Item::Item() :
 
 bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
 {
-    Object::_Create(guidlow, 0, HIGHGUID_ITEM);
+    Object::_Create(guidlow, 0, GUIDTYPE_ITEM);
 
     SetEntry(itemid);
     SetObjectScale(DEFAULT_OBJECT_SCALE);
@@ -549,7 +549,7 @@ bool Item::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
 {
     // create item before any checks for store correct guid
     // and allow use "FSetState(ITEM_REMOVED); SaveToDB();" for deleting item from DB
-    Object::_Create(guidLow, 0, HIGHGUID_ITEM);
+    Object::_Create(guidLow, 0, GUIDTYPE_ITEM);
 
     if (!LoadValues(fields[0].GetString()))
     {
@@ -562,7 +562,7 @@ bool Item::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
     bool need_save = false;                                 // need explicit save data at load fixes
 
     // overwrite possible wrong/corrupted guid
-    ObjectGuid new_item_guid = ObjectGuid(HIGHGUID_ITEM, guidLow);
+    ObjectGuid new_item_guid = ObjectGuid(GUIDTYPE_ITEM, guidLow);
     if (GetGuidValue(OBJECT_FIELD_GUID) != new_item_guid)
     {
         SetGuidValue(OBJECT_FIELD_GUID, new_item_guid);

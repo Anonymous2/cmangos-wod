@@ -161,7 +161,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     CreatureCreatePos pos(owner, owner->GetOrientation(), PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
 
-    uint32 guid = pos.GetMap()->GenerateLocalLowGuid(HIGHGUID_PET);
+    uint32 guid = pos.GetMap()->GenerateLocalLowGuid(GUIDTYPE_PET);
     if (!Create(guid, pos, creatureInfo, pet_number))
     {
         delete result;
@@ -751,7 +751,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
 
     CreatureCreatePos pos(creature, creature->GetOrientation());
 
-    uint32 guid = creature->GetMap()->GenerateLocalLowGuid(HIGHGUID_PET);
+    uint32 guid = creature->GetMap()->GenerateLocalLowGuid(GUIDTYPE_PET);
 
     BASIC_LOG("Create pet");
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
@@ -1250,7 +1250,7 @@ void Pet::_LoadAuras(uint32 timediff)
                 stackcount = 1;
 
             SpellAuraHolder* holder = CreateSpellAuraHolder(spellproto, this, NULL);
-            holder->SetLoadedState(casterGuid, ObjectGuid(HIGHGUID_ITEM, item_lowguid), stackcount, remaincharges, maxduration, remaintime);
+            holder->SetLoadedState(casterGuid, ObjectGuid(GUIDTYPE_ITEM, item_lowguid), stackcount, remaincharges, maxduration, remaintime);
 
             for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
@@ -1496,7 +1496,7 @@ bool Pet::learnSpell(uint32 spell_id)
         Unit* owner = GetOwner();
         if (owner && owner->GetTypeId() == TYPEID_PLAYER)
         {
-            WorldPacket data(SMSG_PET_LEARNED_SPELL, 4);
+            WorldPacket data(SMSG_PET_LEARNED_SPELLS, 4);
             data << uint32(spell_id);
             ((Player*)owner)->GetSession()->SendPacket(&data);
 
@@ -1555,7 +1555,7 @@ bool Pet::unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
             {
                 if (owner->GetTypeId() == TYPEID_PLAYER)
                 {
-                    WorldPacket data(SMSG_PET_REMOVED_SPELL, 4);
+                    WorldPacket data(SMSG_PET_UNLEARNED_SPELLS, 4);
                     data << uint32(spell_id);
                     ((Player*)owner)->GetSession()->SendPacket(&data);
                 }
@@ -1926,7 +1926,7 @@ bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* ci
     SetMap(cPos.GetMap());
     SetPhaseMask(cPos.GetPhaseMask(), false);
 
-    Object::_Create(guidlow, pet_number, HIGHGUID_PET);
+    Object::_Create(guidlow, pet_number, GUIDTYPE_PET);
 
     m_originalEntry = cinfo->Entry;
 

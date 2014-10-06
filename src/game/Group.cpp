@@ -172,7 +172,7 @@ bool Group::LoadGroupFromDB(Field* fields)
     // result = CharacterDatabase.Query("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, groupType, difficulty, raiddifficulty, leaderGuid, groupId FROM groups");
 
     m_Id = fields[17].GetUInt32();
-    m_leaderGuid = ObjectGuid(HIGHGUID_PLAYER, fields[16].GetUInt32());
+    m_leaderGuid = ObjectGuid(GUIDTYPE_PLAYER, fields[16].GetUInt32());
 
     // group leader not exist
     if (!sObjectMgr.GetPlayerNameByGUID(m_leaderGuid, m_leaderName))
@@ -193,10 +193,10 @@ bool Group::LoadGroupFromDB(Field* fields)
         r_diff = RAID_DIFFICULTY_10MAN_NORMAL;
     m_raidDifficulty = Difficulty(r_diff);
 
-    m_mainTankGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
-    m_mainAssistantGuid = ObjectGuid(HIGHGUID_PLAYER, fields[1].GetUInt32());
+    m_mainTankGuid = ObjectGuid(GUIDTYPE_PLAYER, fields[0].GetUInt32());
+    m_mainAssistantGuid = ObjectGuid(GUIDTYPE_PLAYER, fields[1].GetUInt32());
     m_lootMethod = LootMethod(fields[2].GetUInt8());
-    m_looterGuid = ObjectGuid(HIGHGUID_PLAYER, fields[3].GetUInt32());
+    m_looterGuid = ObjectGuid(GUIDTYPE_PLAYER, fields[3].GetUInt32());
     m_lootThreshold = ItemQualities(fields[4].GetUInt16());
 
     for (int i = 0; i < TARGET_ICON_COUNT; ++i)
@@ -208,7 +208,7 @@ bool Group::LoadGroupFromDB(Field* fields)
 bool Group::LoadMemberFromDB(uint32 guidLow, uint8 subgroup, bool assistant)
 {
     MemberSlot member;
-    member.guid      = ObjectGuid(HIGHGUID_PLAYER, guidLow);
+    member.guid      = ObjectGuid(GUIDTYPE_PLAYER, guidLow);
 
     // skip nonexistent member
     if (!sObjectMgr.GetPlayerNameByGUID(member.guid, member.name))
@@ -372,7 +372,7 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
             }
             else
             {
-                data.Initialize(SMSG_GROUP_LIST, 1 + 1 + 1 + 1 + 8 + 4 + 4 + 8);
+                data.Initialize(SMSG_LFG_PARTY_INFO, 1 + 1 + 1 + 1 + 8 + 4 + 4 + 8);
                 data << uint8(0x10) << uint8(0) << uint8(0) << uint8(0);
                 data << uint64(0) << uint32(0) << uint32(0) << uint64(0);
                 player->GetSession()->SendPacket(&data);
@@ -383,7 +383,7 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
 
         if (leaderChanged)
         {
-            WorldPacket data(SMSG_GROUP_SET_LEADER, (m_memberSlots.front().name.size() + 1));
+            WorldPacket data(SMSG_GROUP_NEW_LEADER, (m_memberSlots.front().name.size() + 1));
             data << m_memberSlots.front().name;
             BroadcastPacket(&data, true);
         }
@@ -405,7 +405,7 @@ void Group::ChangeLeader(ObjectGuid guid)
 
     _setLeader(guid);
 
-    WorldPacket data(SMSG_GROUP_SET_LEADER, slot->name.size() + 1);
+    WorldPacket data(SMSG_GROUP_NEW_LEADER, slot->name.size() + 1);
     data << slot->name;
     BroadcastPacket(&data, true);
     SendUpdate();
@@ -455,7 +455,7 @@ void Group::Disband(bool hideDestroy)
         }
         else
         {
-            data.Initialize(SMSG_GROUP_LIST, 1 + 1 + 1 + 1 + 8 + 4 + 4 + 8);
+            data.Initialize(SMSG_LFG_PARTY_INFO, 1 + 1 + 1 + 1 + 8 + 4 + 4 + 8);
             data << uint8(0x10) << uint8(0) << uint8(0) << uint8(0);
             data << uint64(0) << uint32(0) << uint32(0) << uint64(0);
             player->GetSession()->SendPacket(&data);
@@ -488,7 +488,7 @@ void Group::Disband(bool hideDestroy)
 
 void Group::SendLootStartRoll(uint32 CountDown, uint32 mapid, const Roll& r)
 {
-    WorldPacket data(SMSG_LOOT_START_ROLL, (8 + 4 + 4 + 4 + 4 + 4 + 4 + 1));
+    WorldPacket data(SMSG_START_LOOT_ROLL, (8 + 4 + 4 + 4 + 4 + 4 + 4 + 1));
     data << r.lootedTargetGUID;                             // creature guid what we're looting
     data << uint32(mapid);                                  // 3.3.3 mapid
     data << uint32(r.itemSlot);                             // item slot in loot
@@ -652,7 +652,7 @@ void Group::MasterLoot(WorldObject* pSource, Loot* loot)
 
     uint32 real_count = 0;
 
-    WorldPacket data(SMSG_LOOT_MASTER_LIST, 330);
+    WorldPacket data(SMSG_MASTER_LOOT_CANDIDATE_LIST, 330);
     data << uint8(GetMembersCount());
 
     for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
@@ -966,7 +966,7 @@ void Group::SetTargetIcon(uint8 id, ObjectGuid whoGuid, ObjectGuid targetGuid)
 
     m_targetIcons[id] = targetGuid;
 
-    WorldPacket data(MSG_RAID_TARGET_UPDATE, (1 + 8 + 1 + 8));
+    WorldPacket data(SMSG_SEND_RAID_TARGET_UPDATE_ALL, (1 + 8 + 1 + 8));
     data << uint8(0);                                       // set targets
     data << whoGuid;
     data << uint8(id);
@@ -1020,7 +1020,7 @@ void Group::SendTargetIconList(WorldSession* session)
     if (!session)
         return;
 
-    WorldPacket data(MSG_RAID_TARGET_UPDATE, (1 + TARGET_ICON_COUNT * 9));
+    WorldPacket data(SMSG_SEND_RAID_TARGET_UPDATE_SINGLE, (1 + TARGET_ICON_COUNT * 9));
     data << uint8(1);                                       // list targets
 
     for (int i = 0; i < TARGET_ICON_COUNT; ++i)
@@ -1043,7 +1043,7 @@ void Group::SendUpdate()
         if (!player || !player->GetSession() || player->GetGroup() != this)
             continue;
         // guess size
-        WorldPacket data(SMSG_GROUP_LIST, (1 + 1 + 1 + 1 + 8 + 4 + GetMembersCount() * 20));
+        WorldPacket data(SMSG_LFG_PARTY_INFO, (1 + 1 + 1 + 1 + 8 + 4 + GetMembersCount() * 20));
         data << uint8(m_groupType);                         // group type (flags in 3.3)
         data << uint8(citr->group);                         // groupid
         data << uint8(GetFlags(*citr));                     // group flags
@@ -1135,7 +1135,7 @@ void Group::OfflineReadyCheck()
         Player* pl = sObjectMgr.GetPlayer(citr->guid);
         if (!pl || !pl->GetSession())
         {
-            WorldPacket data(MSG_RAID_READY_CHECK_CONFIRM, 9);
+            WorldPacket data(SMSG_READY_CHECK_COMPLETED, 9);
             data << citr->guid;
             data << uint8(0);
             BroadcastReadyCheck(&data);

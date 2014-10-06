@@ -147,12 +147,12 @@ struct CreatureInfo
     uint32  ScriptID;
 
     // helpers
-    HighGuid GetHighGuid() const
+    GuidType GetGuidType() const
     {
-        return VehicleTemplateId ? HIGHGUID_VEHICLE : HIGHGUID_UNIT;
+        return VehicleTemplateId ? GUIDTYPE_VEHICLE : GUIDTYPE_CREATURE;
     }
 
-    ObjectGuid GetObjectGuid(uint32 lowguid) const { return ObjectGuid(GetHighGuid(), Entry, lowguid); }
+    ObjectGuid GetObjectGuid(uint32 lowguid) const { return ObjectGuid(GetGuidType(), Entry, lowguid); }
 
     SkillType GetRequiredLootSkill() const
     {

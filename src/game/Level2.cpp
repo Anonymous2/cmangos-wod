@@ -872,7 +872,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         return false;
     }
 
-    GameObject* target = m_session->GetPlayer()->GetMap()->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, id, lowguid));
+    GameObject* target = m_session->GetPlayer()->GetMap()->GetGameObject(ObjectGuid(GUIDTYPE_GAMEOBJECT, id, lowguid));
 
     PSendSysMessage(LANG_GAMEOBJECT_DETAIL, lowguid, goI->name, lowguid, id, x, y, z, mapid, o);
 
@@ -3108,7 +3108,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
         return false;
 
     CreatureInfo const* waypointInfo = ObjectMgr::GetCreatureTemplate(VISUAL_WAYPOINT);
-    if (!waypointInfo || waypointInfo->GetHighGuid() != HIGHGUID_UNIT)
+    if (!waypointInfo || waypointInfo->GetGuidType() != GUIDTYPE_CREATURE)
         return false;                                       // must exist as normal creature in mangos.sql 'creature_template'
 
     // first arg: add del text emote spell waittime move
@@ -3298,7 +3298,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
 
         CreatureCreatePos pos(chr, chr->GetOrientation());
 
-        if (!wpCreature->Create(map->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, waypointInfo))
+        if (!wpCreature->Create(map->GenerateLocalLowGuid(GUIDTYPE_CREATURE), pos, waypointInfo))
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
             delete wpCreature;
@@ -3339,7 +3339,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
         Creature* wpCreature = NULL;
         if (wpGuid != 0)
         {
-            wpCreature = m_session->GetPlayer()->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, VISUAL_WAYPOINT, wpGuid));
+            wpCreature = m_session->GetPlayer()->GetMap()->GetCreature(ObjectGuid(GUIDTYPE_CREATURE, VISUAL_WAYPOINT, wpGuid));
             wpCreature->DeleteFromDB();
             wpCreature->AddObjectToRemoveList();
         }
@@ -3402,7 +3402,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
             // Respawn the owner of the waypoints
             if (wpGuid != 0)
             {
-                wpCreature = m_session->GetPlayer()->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, VISUAL_WAYPOINT, wpGuid));
+                wpCreature = m_session->GetPlayer()->GetMap()->GetCreature(ObjectGuid(GUIDTYPE_CREATURE, VISUAL_WAYPOINT, wpGuid));
                 wpCreature->DeleteFromDB();
                 wpCreature->AddObjectToRemoveList();
                 // re-create
@@ -3410,7 +3410,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
 
                 CreatureCreatePos pos(chr, chr->GetOrientation());
 
-                if (!wpCreature2->Create(map->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, waypointInfo))
+                if (!wpCreature2->Create(map->GenerateLocalLowGuid(GUIDTYPE_CREATURE), pos, waypointInfo))
                 {
                     PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
                     delete wpCreature2;
@@ -3507,7 +3507,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         return false;
 
     CreatureInfo const* waypointInfo = ObjectMgr::GetCreatureTemplate(VISUAL_WAYPOINT);
-    if (!waypointInfo || waypointInfo->GetHighGuid() != HIGHGUID_UNIT)
+    if (!waypointInfo || waypointInfo->GetGuidType() != GUIDTYPE_CREATURE)
         return false;                                       // must exist as normal creature in mangos.sql 'creature_template'
 
     // first arg: on, off, first, last
@@ -3634,7 +3634,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
 
             // Get the creature for which we read the waypoint
             CreatureData const* data = sObjectMgr.GetCreatureData(wpGuid);
-            Creature* wpCreature = m_session->GetPlayer()->GetMap()->GetCreature(data ? data->GetObjectGuid(wpGuid) : ObjectGuid(HIGHGUID_UNIT, VISUAL_WAYPOINT, wpGuid));
+            Creature* wpCreature = m_session->GetPlayer()->GetMap()->GetCreature(data ? data->GetObjectGuid(wpGuid) : ObjectGuid(GUIDTYPE_CREATURE, VISUAL_WAYPOINT, wpGuid));
 
             PSendSysMessage(LANG_WAYPOINT_INFO_TITLE, point, (wpCreature ? wpCreature->GetName() : "<not found>"), wpGuid);
             PSendSysMessage(LANG_WAYPOINT_INFO_WAITTIME, waittime);
@@ -3671,7 +3671,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
             {
                 Field* fields = result2->Fetch();
                 uint32 wpGuid = fields[0].GetUInt32();
-                Creature* pCreature = m_session->GetPlayer()->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, VISUAL_WAYPOINT, wpGuid));
+                Creature* pCreature = m_session->GetPlayer()->GetMap()->GetCreature(ObjectGuid(GUIDTYPE_CREATURE, VISUAL_WAYPOINT, wpGuid));
 
                 if (!pCreature)
                 {
@@ -3706,7 +3706,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
 
             Creature* wpCreature = new Creature;
 
-            if (!wpCreature->Create(map->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, waypointInfo))
+            if (!wpCreature->Create(map->GenerateLocalLowGuid(GUIDTYPE_CREATURE), pos, waypointInfo))
             {
                 PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
                 delete wpCreature;
@@ -3752,7 +3752,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
 
         Creature* pCreature = new Creature;
 
-        if (!pCreature->Create(map->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, waypointInfo))
+        if (!pCreature->Create(map->GenerateLocalLowGuid(GUIDTYPE_CREATURE), pos, waypointInfo))
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
             delete pCreature;
@@ -3800,7 +3800,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
 
         Creature* pCreature = new Creature;
 
-        if (!pCreature->Create(map->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, waypointInfo))
+        if (!pCreature->Create(map->GenerateLocalLowGuid(GUIDTYPE_CREATURE), pos, waypointInfo))
         {
             PSendSysMessage(LANG_WAYPOINT_NOTCREATED, VISUAL_WAYPOINT);
             delete pCreature;
@@ -3831,7 +3831,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         {
             Field* fields = result->Fetch();
             uint32 wpGuid = fields[0].GetUInt32();
-            Creature* pCreature = m_session->GetPlayer()->GetMap()->GetCreature(ObjectGuid(HIGHGUID_UNIT, VISUAL_WAYPOINT, wpGuid));
+            Creature* pCreature = m_session->GetPlayer()->GetMap()->GetCreature(ObjectGuid(GUIDTYPE_CREATURE, VISUAL_WAYPOINT, wpGuid));
             if (!pCreature)
             {
                 PSendSysMessage(LANG_WAYPOINT_NOTREMOVED, wpGuid);

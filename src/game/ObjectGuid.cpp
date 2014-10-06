@@ -23,23 +23,23 @@
 
 #include <sstream>
 
-char const* ObjectGuid::GetTypeName(HighGuid high)
+char const* ObjectGuid::GetTypeName(GuidType high)
 {
     switch (high)
     {
-        case HIGHGUID_ITEM:         return "Item";
-        case HIGHGUID_PLAYER:       return "Player";
-        case HIGHGUID_GAMEOBJECT:   return "Gameobject";
-        case HIGHGUID_TRANSPORT:    return "Transport";
-        case HIGHGUID_UNIT:         return "Creature";
-        case HIGHGUID_PET:          return "Pet";
-        case HIGHGUID_VEHICLE:      return "Vehicle";
-        case HIGHGUID_DYNAMICOBJECT: return "DynObject";
-        case HIGHGUID_CORPSE:       return "Corpse";
-        case HIGHGUID_MO_TRANSPORT: return "MoTransport";
-        case HIGHGUID_INSTANCE:     return "InstanceID";
-        case HIGHGUID_GROUP:        return "Group";
-        case HIGHGUID_BATTLEGROUND: return "Battleground";
+        case GUIDTYPE_ITEM:         return "Item";
+        case GUIDTYPE_PLAYER:       return "Player";
+        case GUIDTYPE_GAMEOBJECT:   return "Gameobject";
+        case GUIDTYPE_TRANSPORT:    return "Transport";
+        case GUIDTYPE_CREATURE:         return "Creature";
+        case GUIDTYPE_PET:          return "Pet";
+        case GUIDTYPE_VEHICLE:      return "Vehicle";
+        case GUIDTYPE_DYNAMICOBJECT: return "DynObject";
+        case GUIDTYPE_CORPSE:       return "Corpse";
+        //case GUIDTYPE_MO_TRANSPORT: return "MoTransport";
+        case GUIDTYPE_RAIDGROUP:     return "InstanceID";
+        case GUIDTYPE_PARTY:        return "Group";
+        case GUIDTYPE_PVPQUEUEGROUP: return "Battleground";
         default:
             return "<unknown>";
     }
@@ -64,7 +64,7 @@ std::string ObjectGuid::GetString() const
     return str.str();
 }
 
-template<HighGuid high>
+template<GuidType high>
 uint32 ObjectGuidGenerator<high>::Generate()
 {
     if (m_nextGuid >= ObjectGuid::GetMaxCounter(high) - 1)
@@ -99,14 +99,14 @@ ByteBuffer& operator>>(ByteBuffer& buf, PackedGuidReader const& guid)
     return buf;
 }
 
-template uint32 ObjectGuidGenerator<HIGHGUID_ITEM>::Generate();
-template uint32 ObjectGuidGenerator<HIGHGUID_PLAYER>::Generate();
-template uint32 ObjectGuidGenerator<HIGHGUID_GAMEOBJECT>::Generate();
-template uint32 ObjectGuidGenerator<HIGHGUID_TRANSPORT>::Generate();
-template uint32 ObjectGuidGenerator<HIGHGUID_UNIT>::Generate();
-template uint32 ObjectGuidGenerator<HIGHGUID_PET>::Generate();
-template uint32 ObjectGuidGenerator<HIGHGUID_VEHICLE>::Generate();
-template uint32 ObjectGuidGenerator<HIGHGUID_DYNAMICOBJECT>::Generate();
-template uint32 ObjectGuidGenerator<HIGHGUID_CORPSE>::Generate();
-template uint32 ObjectGuidGenerator<HIGHGUID_INSTANCE>::Generate();
-template uint32 ObjectGuidGenerator<HIGHGUID_GROUP>::Generate();
+template uint32 ObjectGuidGenerator<GUIDTYPE_ITEM>::Generate();
+template uint32 ObjectGuidGenerator<GUIDTYPE_PLAYER>::Generate();
+template uint32 ObjectGuidGenerator<GUIDTYPE_GAMEOBJECT>::Generate();
+template uint32 ObjectGuidGenerator<GUIDTYPE_TRANSPORT>::Generate();
+template uint32 ObjectGuidGenerator<GUIDTYPE_CREATURE>::Generate();
+template uint32 ObjectGuidGenerator<GUIDTYPE_PET>::Generate();
+template uint32 ObjectGuidGenerator<GUIDTYPE_VEHICLE>::Generate();
+template uint32 ObjectGuidGenerator<GUIDTYPE_DYNAMICOBJECT>::Generate();
+template uint32 ObjectGuidGenerator<GUIDTYPE_CORPSE>::Generate();
+template uint32 ObjectGuidGenerator<GUIDTYPE_RAIDGROUP>::Generate();
+template uint32 ObjectGuidGenerator<GUIDTYPE_PARTY>::Generate();

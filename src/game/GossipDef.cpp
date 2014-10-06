@@ -249,7 +249,7 @@ void PlayerMenu::SendTalking(uint32 textID)
 {
     GossipText const* pGossip = sObjectMgr.GetGossipText(textID);
 
-    WorldPacket data(SMSG_NPC_TEXT_UPDATE, 100);            // guess size
+    WorldPacket data(SMSG_QUERY_NPC_TEXT_RESPONSE, 100);            // guess size
     data << textID;                                         // can be < 0
 
     if (!pGossip)
@@ -311,7 +311,7 @@ void PlayerMenu::SendTalking(uint32 textID)
 
 void PlayerMenu::SendTalking(char const* title, char const* text)
 {
-    WorldPacket data(SMSG_NPC_TEXT_UPDATE, 50);             // guess size
+    WorldPacket data(SMSG_QUERY_NPC_TEXT_RESPONSE, 50);             // guess size
     data << uint32(0);
     for (uint32 i = 0; i < 8; ++i)
     {
@@ -377,7 +377,7 @@ void QuestMenu::ClearMenu()
 
 void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title, ObjectGuid npcGUID)
 {
-    WorldPacket data(SMSG_QUESTGIVER_QUEST_LIST, 100);      // guess size
+    WorldPacket data(SMSG_QUEST_GIVER_QUEST_LIST_MESSAGE, 100);      // guess size
     data << ObjectGuid(npcGUID);
     data << Title;
     data << uint32(eEmote._Delay);                          // player emote
@@ -413,7 +413,7 @@ void PlayerMenu::SendQuestGiverQuestList(QEmote eEmote, const std::string& Title
 
 void PlayerMenu::SendQuestGiverStatus(uint32 questStatus, ObjectGuid npcGUID)
 {
-    WorldPacket data(SMSG_QUESTGIVER_STATUS, 12);
+    WorldPacket data(SMSG_QUEST_GIVER_STATUS, 12);
     data << npcGUID;
     data << uint32(questStatus);
 
@@ -453,7 +453,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
         }
     }
 
-    WorldPacket data(SMSG_QUESTGIVER_QUEST_DETAILS, 100);   // guess size
+    WorldPacket data(SMSG_QUEST_GIVER_QUEST_DETAILS, 100);   // guess size
     data << guid;
     data << uint64(0);                                      // wotlk, something todo with quest sharing?
     data << uint32(pQuest->GetQuestId());
@@ -609,7 +609,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
         }
     }
 
-    WorldPacket data(SMSG_QUEST_QUERY_RESPONSE, 100);       // guess size
+    WorldPacket data(SMSG_QUERY_QUEST_INFO_RESPONSE, 100);       // guess size
 
     data << uint32(pQuest->GetQuestId());                   // quest id
     data << uint32(pQuest->GetQuestMethod());               // Accepted values: 0, 1 or 2. 0==IsAutoComplete() (skip objectives/details)
@@ -784,7 +784,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
         }
     }
 
-    WorldPacket data(SMSG_QUESTGIVER_OFFER_REWARD, 50);     // guess size
+    WorldPacket data(SMSG_QUEST_GIVER_OFFER_REWARD_MESSAGE, 50);     // guess size
 
     data << ObjectGuid(npcGUID);
     data << uint32(pQuest->GetQuestId());
@@ -907,7 +907,7 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
         }
     }
 
-    WorldPacket data(SMSG_QUESTGIVER_REQUEST_ITEMS, 50);    // guess size
+    WorldPacket data(SMSG_QUEST_GIVER_REQUEST_ITEMS, 50);    // guess size
     data << ObjectGuid(npcGUID);
     data << uint32(pQuest->GetQuestId());
     data << Title;

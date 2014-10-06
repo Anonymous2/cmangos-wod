@@ -339,7 +339,7 @@ class Guild
 
         uint32 GetId() const { return m_Id; }
         uint32 GetLevel() const { return m_Level; }
-        ObjectGuid GetObjectGuid() const { return ObjectGuid(HIGHGUID_GUILD, 0, m_Id); }
+        ObjectGuid GetObjectGuid() const { return ObjectGuid(GUIDTYPE_GUILD, 0, m_Id); }
         ObjectGuid GetLeaderGuid() const { return m_LeaderGuid; }
         std::string const& GetName() const { return m_Name; }
         std::string const& GetMOTD() const { return MOTD; }
@@ -390,7 +390,7 @@ class Guild
         void BroadcastWorker(Do& _do, Player* except = NULL)
         {
             for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
-                if (Player* player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first)))
+                if (Player* player = ObjectAccessor::FindPlayer(ObjectGuid(GUIDTYPE_PLAYER, itr->first)))
                     if (player != except)
                         _do(player);
         }

@@ -70,7 +70,7 @@ class MapPersistentState
         MapPersistentState objects may be created on player logon but the maps are
         created and loaded only when a player actually enters the instance. */
         uint32 GetInstanceId() const { return m_instanceid; }
-        ObjectGuid GetInstanceGuid() const { return ObjectGuid(HIGHGUID_INSTANCE, GetInstanceId()); }
+        ObjectGuid GetInstanceGuid() const { return ObjectGuid(GUIDTYPE_RAIDGROUP, GetInstanceId()); }
         uint32 GetMapId() const { return m_mapid; }
 
         MapEntry const* GetMapEntry() const;

@@ -55,8 +55,8 @@ bool InstanceData::CheckConditionCriteriaMeet(Player const* /*source*/, uint32 i
 
 void InstanceData::SendEncounterFrame(uint32 type, ObjectGuid sourceGuid /*= NULL*/, uint8 param1 /*= 0*/, uint8 param2 /*= 0*/)
 {
-    // size of this packet is at most 15 (usually less)
-    WorldPacket data(SMSG_INSTANCE_ENCOUNTER, 15);
+    // Different opcodes for different types
+    /*WorldPacket data(SMSG_INSTANCE_ENCOUNTER, 15);
     data << uint32(type);
 
     switch (type)
@@ -86,5 +86,5 @@ void InstanceData::SendEncounterFrame(uint32 type, ObjectGuid sourceGuid /*= NUL
             break;
     }
 
-    instance->SendToPlayers(&data);
+    instance->SendToPlayers(&data);*/
 }

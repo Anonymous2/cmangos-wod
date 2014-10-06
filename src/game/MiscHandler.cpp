@@ -459,7 +459,7 @@ void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult* result, uint32 acc
         return;
 
     uint32 friendLowGuid = (*result)[0].GetUInt32();
-    ObjectGuid friendGuid = ObjectGuid(HIGHGUID_PLAYER, friendLowGuid);
+    ObjectGuid friendGuid = ObjectGuid(GUIDTYPE_PLAYER, friendLowGuid);
     Team team = Player::TeamForRace((*result)[1].GetUInt8());
 
     delete result;
@@ -540,7 +540,7 @@ void WorldSession::HandleAddIgnoreOpcodeCallBack(QueryResult* result, uint32 acc
         return;
 
     uint32 ignoreLowGuid = (*result)[0].GetUInt32();
-    ObjectGuid ignoreGuid = ObjectGuid(HIGHGUID_PLAYER, ignoreLowGuid);
+    ObjectGuid ignoreGuid = ObjectGuid(GUIDTYPE_PLAYER, ignoreLowGuid);
 
     delete result;
 
@@ -818,7 +818,7 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recv_data)
     {
         SetAccountData(AccountDataType(type), 0, "");
 
-        WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA_COMPLETE, 4 + 4);
+        WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA, 4 + 4);
         data << uint32(type);
         data << uint32(0);
         SendPacket(&data);
@@ -851,7 +851,7 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recv_data)
 
     SetAccountData(AccountDataType(type), timestamp, adata);
 
-    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA_COMPLETE, 4 + 4);
+    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA, 4 + 4);
     data << uint32(type);
     data << uint32(0);
     SendPacket(&data);
@@ -1054,7 +1054,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     if (!plr)                                               // wrong player
         return;
 
-    WorldPacket data(SMSG_INSPECT_RESULTS, 50);
+    WorldPacket data(SMSG_INSPECT_RESULT, 50);
     data << plr->GetObjectGuid();
 
     if (sWorld.getConfig(CONFIG_BOOL_TALENTS_INSPECTING) || _player->isGameMaster())
@@ -1189,7 +1189,7 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
 
     std::string msg = charname + "'s " + "account is " + acc + ", e-mail: " + email + ", last ip: " + lastip;
 
-    WorldPacket data(SMSG_WHOIS, msg.size() + 1);
+    WorldPacket data(SMSG_WHO_IS, msg.size() + 1);
     data << msg;
     _player->GetSession()->SendPacket(&data);
 
@@ -1232,7 +1232,7 @@ void WorldSession::HandleComplainOpcode(WorldPacket& recv_data)
     // if it's mail spam - ALL mails from this spammer automatically removed by client
 
     // Complaint Received message
-    WorldPacket data(SMSG_COMPLAIN_RESULT, 1);
+    WorldPacket data(SMSG_COMPLAINT_RESULT, 1);
     data << uint8(0);
     SendPacket(&data);
 

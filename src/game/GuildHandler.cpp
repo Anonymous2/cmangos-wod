@@ -273,7 +273,7 @@ void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
     DEBUG_LOG("WORLD: Received opcode %s", LookupOpcodeName(recvPacket.GetOpcode()));
 
     if (Player* inviter = sObjectMgr.GetPlayer(GetPlayer()->GetGuildInviterGuid()))
-        inviter->SendGuildDeclined(GetPlayer()->GetName(), recvPacket.GetOpcode() == CMSG_GUILD_AUTO_DECLINE);
+        inviter->SendGuildDeclined(GetPlayer()->GetName(), recvPacket.GetOpcode() == CMSG_GUILD_AUTO_DECLINE_INVITATION);
 
     GetPlayer()->SetGuildInvited(0);
     GetPlayer()->SetInGuild(0);
@@ -291,7 +291,7 @@ void WorldSession::HandleGuildInfoOpcode(WorldPacket& /*recvPacket*/)
         return;
     }
 
-    WorldPacket data(SMSG_GUILD_INFO, (guild->GetName().size() + 4 + 4 + 4));
+    WorldPacket data(SMSG_QUERY_GUILD_INFO_RESPONSE, (guild->GetName().size() + 4 + 4 + 4));
     data << guild->GetName();
     data << uint32(secsToTimeBitFields(guild->GetCreatedDate())); // 3.x (prev. day + month + year)
     data << uint32(guild->GetMemberSize());                 // amount of chars
@@ -1008,7 +1008,7 @@ void WorldSession::HandleGuildPermissions(WorldPacket& /* recv_data */)
         {
             uint32 rankId = GetPlayer()->GetRank();
 
-            WorldPacket data(SMSG_GUILD_PERMISSIONS, 4 * 15 + 2 * 8 + 3);
+            WorldPacket data(SMSG_GUILD_PERMISSIONS_QUERY_RESULTS, 4 * 15 + 2 * 8 + 3);
             data << uint32(rankId);                         // guild rank id
             data << uint32(pGuild->GetPurchasedTabs());     // tabs count
             data << uint32(pGuild->GetRankRights(rankId));  // rank rights
@@ -1022,7 +1022,7 @@ void WorldSession::HandleGuildPermissions(WorldPacket& /* recv_data */)
                 data << uint32(pGuild->GetMemberSlotWithdrawRem(GetPlayer()->GetGUIDLow(), uint8(i)));
             }
             SendPacket(&data);
-            DEBUG_LOG("WORLD: Sent (SMSG_GUILD_PERMISSIONS)");
+            DEBUG_LOG("WORLD: Sent (SMSG_GUILD_PERMISSIONS_QUERY_RESULTS)");
         }
     }
 }
@@ -1433,7 +1433,7 @@ void WorldSession::HandleSetGuildBankTabText(WorldPacket& recv_data)
 
 void WorldSession::SendSaveGuildEmblem(uint32 msg)
 {
-    WorldPacket data(MSG_SAVE_GUILD_EMBLEM, 4);
+    WorldPacket data(SMSG_PLAYER_SAVE_GUILD_EMBLEM, 4);
     data << uint32(msg);                                    // not part of guild
     SendPacket(&data);
 }

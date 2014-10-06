@@ -120,7 +120,7 @@ void PlayerSocial::SetFriendNote(ObjectGuid friend_guid, std::string note)
 
 void PlayerSocial::SendSocialList()
 {
-    Player* plr = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, m_playerLowGuid));
+    Player* plr = sObjectMgr.GetPlayer(ObjectGuid(GUIDTYPE_PLAYER, m_playerLowGuid));
     if (!plr)
         return;
 
@@ -134,7 +134,7 @@ void PlayerSocial::SendSocialList()
     {
         sSocialMgr.GetFriendInfo(plr, itr->first, itr->second);
 
-        data << ObjectGuid(HIGHGUID_PLAYER, itr->first);    // player guid
+        data << ObjectGuid(GUIDTYPE_PLAYER, itr->first);    // player guid
         data << uint32(itr->second.Flags);                  // player flag (0x1-friend?, 0x2-ignored?, 0x4-muted?)
         data << itr->second.Note;                           // string note
         if (itr->second.Flags & SOCIAL_FLAG_FRIEND)         // if IsFriend()
@@ -182,7 +182,7 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friend_lowguid, FriendInfo&
     if (!player)
         return;
 
-    Player* pFriend = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, friend_lowguid));
+    Player* pFriend = ObjectAccessor::FindPlayer(ObjectGuid(GUIDTYPE_PLAYER, friend_lowguid));
 
     Team team = player->GetTeam();
     AccountTypes security = player->GetSession()->GetSecurity();
@@ -222,7 +222,7 @@ void SocialMgr::MakeFriendStatusPacket(FriendsResult result, uint32 guid, WorldP
 {
     data->Initialize(SMSG_FRIEND_STATUS, 5);
     *data << uint8(result);
-    *data << ObjectGuid(HIGHGUID_PLAYER, guid);
+    *data << ObjectGuid(GUIDTYPE_PLAYER, guid);
 }
 
 void SocialMgr::SendFriendStatus(Player* player, FriendsResult result, ObjectGuid friend_guid, bool broadcast)
@@ -279,7 +279,7 @@ void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket* packet)
         PlayerSocialMap::const_iterator itr2 = itr->second.m_playerSocialMap.find(guid);
         if (itr2 != itr->second.m_playerSocialMap.end() && (itr2->second.Flags & SOCIAL_FLAG_FRIEND))
         {
-            Player* pFriend = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+            Player* pFriend = ObjectAccessor::FindPlayer(ObjectGuid(GUIDTYPE_PLAYER, itr->first));
 
             // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
             // MODERATOR, GAME MASTER, ADMINISTRATOR can see all

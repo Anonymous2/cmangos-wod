@@ -321,7 +321,9 @@ void WorldSession::HandleGetChannelMemberCountOpcode(WorldPacket& recvPacket)
     // recvPacket.hexlike();
     std::string channelname;
     recvPacket >> channelname;
-    if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
+    
+    // Verify
+    /*if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
     {
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
         {
@@ -331,7 +333,7 @@ void WorldSession::HandleGetChannelMemberCountOpcode(WorldPacket& recvPacket)
             data << uint32(chn->GetNumPlayers());
             SendPacket(&data);
         }
-    }
+    }*/
 }
 
 void WorldSession::HandleSetChannelWatchOpcode(WorldPacket& recvPacket)

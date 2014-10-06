@@ -1217,7 +1217,7 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket* data, BattleGro
     {
         case STATUS_NONE:
         {
-            data->Initialize(SMSG_BATTLEFIELD_STATUS);
+            data->Initialize(SMSG_BATTLEFIELD_STATUS_NONE);
 
             data->WriteGuidMask<0, 4, 7, 1, 6, 3, 5, 2>(playerGuid);
             data->WriteGuidBytes<5, 6, 7, 2>(playerGuid);
@@ -1276,7 +1276,7 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket* data, BattleGro
         }
         case STATUS_WAIT_JOIN:
         {
-            data->Initialize(SMSG_BATTLEFIELD_STATUS_NEEDCONFIRMATION, 44);
+            data->Initialize(SMSG_BATTLEFIELD_STATUS_NEED_CONFIRMATION, 44);
 
             *data << uint32(bg->GetClientInstanceID()); // Client Instance ID
             *data << uint32(Time1);                     // Time until closed
@@ -1370,7 +1370,7 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket* data, BattleGro
         case STATUS_WAIT_LEAVE:
         {
             // not used currently and not checked
-            data->Initialize(SMSG_BATTLEFIELD_STATUS_WAITFORGROUPS, 48);
+            data->Initialize(SMSG_BATTLEFIELD_STATUS_WAIT_FOR_GROUPS, 48);
 
             *data << uint8(0);                          // unk
             *data << uint32(QueueSlot);                 // not queueSlot

@@ -41,7 +41,7 @@
 #include "zlib/zlib.h"
 
 // select opcodes appropriate for processing in Map::Update context for current session state
-static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& opHandle)
+static bool MapSessionFilterHelper(WorldSession* session, ClientOpcodeHandler const& opHandle)
 {
     // we do not process thread-unsafe packets
     if (opHandle.packetProcessing == PROCESS_THREADUNSAFE)
@@ -58,7 +58,7 @@ static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& o
 
 bool MapSessionFilter::Process(WorldPacket* packet)
 {
-    OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+    ClientOpcodeHandler const& opHandle = clientOpcodeTable[packet->GetOpcodeValue()];
     if (opHandle.packetProcessing == PROCESS_INPLACE)
         return true;
 
@@ -70,7 +70,7 @@ bool MapSessionFilter::Process(WorldPacket* packet)
 // OR packet handler is not thread-safe!
 bool WorldSessionFilter::Process(WorldPacket* packet)
 {
-    OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+    ClientOpcodeHandler const& opHandle = clientOpcodeTable[packet->GetOpcodeValue()];
     // check if packet handler is supposed to be safe
     if (opHandle.packetProcessing == PROCESS_INPLACE)
         return true;
@@ -132,7 +132,7 @@ void WorldSession::SendPacket(WorldPacket const* packet)
     if (!m_Socket)
         return;
 
-    if (opcodeTable[packet->GetOpcode()].status == STATUS_UNHANDLED)
+    if (serverOpcodeTable[packet->GetOpcode()].status == STATUS_UNHANDLED)
     {
         sLog.outError("SESSION: tried to send an unhandled opcode 0x%.4X", packet->GetOpcode());
         return;
@@ -218,7 +218,7 @@ bool WorldSession::Update(PacketFilter& updater)
                         packet->GetOpcode());
         #endif*/
 
-        OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+        ClientOpcodeHandler const& opHandle = clientOpcodeTable[packet->GetOpcodeValue()];
         try
         {
             switch (opHandle.status)
@@ -529,10 +529,10 @@ void WorldSession::SendAreaTriggerMessage(const char* Text, ...)
     va_end(ap);
 
     uint32 length = strlen(szStr) + 1;
-    WorldPacket data(SMSG_AREA_TRIGGER_MESSAGE, 4 + length);
+    /*WorldPacket data(SMSG_AREA_TRIGGER_MESSAGE, 4 + length);
     data << length;
     data << szStr;
-    SendPacket(&data);
+    SendPacket(&data);*/
 }
 
 void WorldSession::SendNotification(const char* format, ...)
@@ -546,7 +546,7 @@ void WorldSession::SendNotification(const char* format, ...)
         vsnprintf(szStr, 1024, format, ap);
         va_end(ap);
 
-        WorldPacket data(SMSG_NOTIFICATION, (strlen(szStr) + 1));
+        WorldPacket data(SMSG_PRINT_NOTIFICATION, (strlen(szStr) + 1));
         data.WriteBits(strlen(szStr), 13);
         data.FlushBits();
         data.append(szStr, strlen(szStr));
@@ -566,7 +566,7 @@ void WorldSession::SendNotification(int32 string_id, ...)
         vsnprintf(szStr, 1024, format, ap);
         va_end(ap);
 
-        WorldPacket data(SMSG_NOTIFICATION, (strlen(szStr) + 1));
+        WorldPacket data(SMSG_PRINT_NOTIFICATION, (strlen(szStr) + 1));
         data.WriteBits(strlen(szStr), 13);
         data.FlushBits();
         data.append(szStr, strlen(szStr));
@@ -574,13 +574,14 @@ void WorldSession::SendNotification(int32 string_id, ...)
     }
 }
 
+// Change it to usage with phase id instead of phase mask
 void WorldSession::SendSetPhaseShift(uint32 phaseMask, uint16 mapId)
 {
     ObjectGuid guid = _player->GetObjectGuid();
 
     uint32 phaseFlags = 0;
 
-    for (uint32 i = 0; i < sPhaseStore.GetNumRows(); i++)
+    /*for (uint32 i = 0; i < sPhaseStore.GetNumRows(); i++)
     {
         if (PhaseEntry const* phase = sPhaseStore.LookupEntry(i))
         {
@@ -590,9 +591,9 @@ void WorldSession::SendSetPhaseShift(uint32 phaseMask, uint16 mapId)
                 break;
             }
         }
-    }
+    }*/
 
-    WorldPacket data(SMSG_SET_PHASE_SHIFT, 30);
+    WorldPacket data(SMSG_PHASE_SHIFT_CHANGE, 30);
     data.WriteGuidMask<2, 3, 1, 6, 4, 5, 0, 7>(guid);
     data.WriteGuidBytes<7, 4>(guid);
 
@@ -1012,7 +1013,7 @@ void WorldSession::SendRedirectClient(std::string& ip, uint16 port)
     SendPacket(&pkt);
 }
 
-void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket* packet)
+void WorldSession::ExecuteOpcode(ClientOpcodeHandler const& opHandle, WorldPacket* packet)
 {
     // need prevent do internal far teleports in handlers because some handlers do lot steps
     // or call code that can do far teleports in some conditions unexpectedly for generic way work code

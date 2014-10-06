@@ -59,7 +59,7 @@ void WorldSession::SendPartyResult(PartyOperation operation, const std::string& 
 
 void WorldSession::SendGroupInvite(Player* player, bool alreadyInGroup /*= false*/)
 {
-    WorldPacket data(SMSG_GROUP_INVITE, 21);                // guess size
+    WorldPacket data(SMSG_PARTY_INVITE, 21);                // guess size
     data.WriteBit(0);
     data.WriteGuidMask<0, 3, 2>(player->GetObjectGuid());
     data.WriteBit(!alreadyInGroup);
@@ -480,7 +480,7 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
     /********************/
 
     // everything is fine, do it
-    WorldPacket data(MSG_MINIMAP_PING, (8 + 4 + 4));
+    WorldPacket data(SMSG_MINIMAP_PING, (8 + 4 + 4));
     data << GetPlayer()->GetObjectGuid();
     data << float(x);
     data << float(y);
@@ -503,7 +503,7 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
 
     // DEBUG_LOG("ROLL: MIN: %u, MAX: %u, ROLL: %u", minimum, maximum, roll);
 
-    WorldPacket data(MSG_RANDOM_ROLL, 4 + 4 + 4 + 8);
+    WorldPacket data(SMSG_RANDOM_ROLL, 4 + 4 + 4 + 8);
     data << uint32(minimum);
     data << uint32(maximum);
     data << uint32(roll);
@@ -671,7 +671,7 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
         /********************/
 
         // everything is fine, do it
-        WorldPacket data(MSG_RAID_READY_CHECK, 8);
+        WorldPacket data(SMSG_READY_CHECK_STARTED, 8);
         data << ObjectGuid(GetPlayer()->GetObjectGuid());
         group->BroadcastPacket(&data, false, -1);
 
@@ -687,7 +687,7 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
             return;
 
         // everything is fine, do it
-        WorldPacket data(MSG_RAID_READY_CHECK_CONFIRM, 9);
+        WorldPacket data(SMSG_READY_CHECK_COMPLETED, 9);
         data << GetPlayer()->GetObjectGuid();
         data << uint8(state);
         group->BroadcastReadyCheck(&data);
@@ -721,7 +721,8 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         if (mask & (1 << i))
             byteCount += GroupUpdateLength[i];
 
-    data->Initialize(SMSG_PARTY_MEMBER_STATS, 8 + 4 + byteCount);
+    // Rewrite
+    /*data->Initialize(SMSG_PARTY_MEMBER_STATS, 8 + 4 + byteCount);
     *data << player->GetPackGUID();
     *data << uint32(mask);
 
@@ -908,7 +909,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
             *data << uint32(((Unit*)player->GetTransportInfo()->GetTransport())->GetVehicleInfo()->GetVehicleEntry()->m_seatID[player->GetTransportInfo()->GetTransportSeat()]);
         else
             *data << uint32(0);
-    }
+    }*/
 }
 
 /*this procedure handles clients CMSG_REQUEST_PARTY_MEMBER_STATS request*/
@@ -921,18 +922,18 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     Player* player = ObjectAccessor::FindPlayer(guid, false);
     if (!player)
     {
-        WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 3 + 4 + 2);
+        /*WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 3 + 4 + 2);
         data << uint8(0);                                   // only for SMSG_PARTY_MEMBER_STATS_FULL, probably arena/bg related
         data << guid.WriteAsPacked();
         data << uint32(GROUP_UPDATE_FLAG_STATUS);
         data << uint16(MEMBER_STATUS_OFFLINE);
-        SendPacket(&data);
+        SendPacket(&data);*/
         return;
     }
 
     Pet* pet = player->GetPet();
 
-    WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 4 + 2 + 2 + 2 + 1 + 2 * 6 + 8 + 1 + 8);
+    /*WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 4 + 2 + 2 + 2 + 1 + 2 * 6 + 8 + 1 + 8);
     data << uint8(0);                                       // only for SMSG_PARTY_MEMBER_STATS_FULL, probably arena/bg related
     data << player->GetPackGUID();
 
@@ -1059,7 +1060,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     data << uint32(0);                                      // GROUP_UPDATE_FLAG_PHASE
     data << uint8(0);                                       // GROUP_UPDATE_FLAG_PHASE
 
-    SendPacket(&data);
+    SendPacket(&data);*/
 }
 
 void WorldSession::HandleRequestRaidInfoOpcode(WorldPacket& /*recv_data*/)

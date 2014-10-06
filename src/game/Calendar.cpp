@@ -594,7 +594,7 @@ void CalendarMgr::LoadCalendarsFromDB()
             CalendarEvent& newEvent = m_EventStore[eventId];
 
             newEvent.EventId       = eventId;
-            newEvent.CreatorGuid   = ObjectGuid(HIGHGUID_PLAYER, field[1].GetUInt32());
+            newEvent.CreatorGuid   = ObjectGuid(GUIDTYPE_PLAYER, field[1].GetUInt32());
             newEvent.GuildId       = field[2].GetUInt32();
             newEvent.Type          = CalendarEventType(field[3].GetUInt8());
             newEvent.Flags         = field[4].GetUInt32();
@@ -646,8 +646,8 @@ void CalendarMgr::LoadCalendarsFromDB()
 
                 uint64 inviteId             = field[0].GetUInt64();
                 uint64 eventId              = field[1].GetUInt64();
-                ObjectGuid inviteeGuid      = ObjectGuid(HIGHGUID_PLAYER, field[2].GetUInt32());
-                ObjectGuid senderGuid       = ObjectGuid(HIGHGUID_PLAYER, field[3].GetUInt32());
+                ObjectGuid inviteeGuid      = ObjectGuid(GUIDTYPE_PLAYER, field[2].GetUInt32());
+                ObjectGuid senderGuid       = ObjectGuid(GUIDTYPE_PLAYER, field[3].GetUInt32());
                 CalendarInviteStatus status = CalendarInviteStatus(field[4].GetUInt8());
                 time_t lastUpdateTime       = time_t(field[5].GetUInt32());
                 CalendarModerationRank rank = CalendarModerationRank(field[6].GetUInt8());

@@ -68,7 +68,7 @@ void WorldSession::HandleTabardVendorActivateOpcode(WorldPacket& recv_data)
 
 void WorldSession::SendTabardVendorActivate(ObjectGuid guid)
 {
-    WorldPacket data(MSG_TABARDVENDOR_ACTIVATE, 8);
+    WorldPacket data(SMSG_PLAYER_TABARD_VENDOR_ACTIVATE, 8);
     data << ObjectGuid(guid);
     SendPacket(&data);
 }
@@ -236,7 +236,7 @@ void WorldSession::SendTrainerList(ObjectGuid guid, const std::string& strTitle)
 
 void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
 {
-    ObjectGuid guid;
+    /*ObjectGuid guid;
     uint32 spellId = 0, trainerId = 0;
 
     recv_data >> guid >> trainerId >> spellId;
@@ -325,7 +325,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
         sendData << uint32(spellId);                                // should be same as in packet from client
         sendData << uint32(trainState);
         SendPacket(&sendData);
-    }
+    }*/
 }
 
 void WorldSession::HandleGossipHelloOpcode(WorldPacket& recv_data)
@@ -502,11 +502,12 @@ void WorldSession::SendBindPoint(Creature* npc)
     // send spell for bind 3286 bind magic
     npc->CastSpell(_player, 3286, true);                    // Bind
 
-    WorldPacket data(SMSG_TRAINER_SERVICE, 16);
+    // Verify
+    /*WorldPacket data(SMSG_TRAINER_SERVICE, 16);
     data << npc->GetObjectGuid();
     data << uint32(3286);                                   // Bind
     data << uint32(2);
-    SendPacket(&data);
+    SendPacket(&data);*/
 
     _player->PlayerTalkClass->CloseGossip();
 }
@@ -533,9 +534,9 @@ void WorldSession::HandleListStabledPetsOpcode(WorldPacket& recv_data)
 
 void WorldSession::SendStablePet(ObjectGuid guid)
 {
-    DEBUG_LOG("WORLD: Recv MSG_LIST_STABLED_PETS Send.");
+    DEBUG_LOG("WORLD: Recv CMSG_LIST_STABLED_PETS Send.");
 
-    WorldPacket data(MSG_LIST_STABLED_PETS, 200);           // guess size
+    WorldPacket data(SMSG_PET_STABLE_LIST, 200);           // guess size
     data << guid;
 
     Pet* pet = _player->GetPet();
@@ -587,7 +588,7 @@ void WorldSession::SendStablePet(ObjectGuid guid)
 
 void WorldSession::SendStableResult(uint8 res)
 {
-    WorldPacket data(SMSG_STABLE_RESULT, 1);
+    WorldPacket data(SMSG_PET_STABLE_RESULT, 1);
     data << uint8(res);
     SendPacket(&data);
 }

@@ -898,26 +898,26 @@ bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeIte
     if (!guid)
         return true;
 
-    switch (guid.GetHigh())
+    switch (guid.GetType())
     {
-        case HIGHGUID_UNIT:
-        case HIGHGUID_VEHICLE:
+        case GUIDTYPE_CREATURE:
+        case GUIDTYPE_VEHICLE:
             resultObject = m_map->GetCreature(guid);
             break;
-        case HIGHGUID_PET:
+        case GUIDTYPE_PET:
             resultObject = m_map->GetPet(guid);
             break;
-        case HIGHGUID_PLAYER:
+        case GUIDTYPE_PLAYER:
             resultObject = m_map->GetPlayer(guid);
             break;
-        case HIGHGUID_GAMEOBJECT:
+        case GUIDTYPE_GAMEOBJECT:
             resultObject = m_map->GetGameObject(guid);
             break;
-        case HIGHGUID_CORPSE:
+        case GUIDTYPE_CORPSE:
             resultObject = HashMapHolder<Corpse>::Find(guid);
             break;
-        case HIGHGUID_ITEM:
-            // case HIGHGUID_CONTAINER: ==HIGHGUID_ITEM
+        case GUIDTYPE_ITEM:
+            // case GUIDTYPE_ITEM: ==GUIDTYPE_ITEM
         {
             if (includeItem)
             {
@@ -962,7 +962,7 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
             else
             {
                 // GameObjectInfo const* ginfo = ObjectMgr::GetGameObjectInfo(m_script->buddyEntry);
-                pBuddy = m_map->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, m_script->buddyEntry, m_script->searchRadiusOrGuid));
+                pBuddy = m_map->GetGameObject(ObjectGuid(GUIDTYPE_GAMEOBJECT, m_script->buddyEntry, m_script->searchRadiusOrGuid));
             }
             // TODO Maybe load related grid if not already done? How to handle multi-map case?
             if (!pBuddy)
@@ -1322,7 +1322,7 @@ bool ScriptAction::HandleScriptStep()
                     break;                                  // checked at load
 
                 // TODO - This was a change, was before current map of source
-                pGo = m_map->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, goData->id, m_script->respawnGo.goGuid));
+                pGo = m_map->GetGameObject(ObjectGuid(GUIDTYPE_GAMEOBJECT, goData->id, m_script->respawnGo.goGuid));
             }
             else
             {
@@ -1390,7 +1390,7 @@ bool ScriptAction::HandleScriptStep()
                     break;
 
                 // TODO - Was a change, before random map
-                pDoor = m_map->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, goData->id, m_script->changeDoor.goGuid));
+                pDoor = m_map->GetGameObject(ObjectGuid(GUIDTYPE_GAMEOBJECT, goData->id, m_script->changeDoor.goGuid));
             }
             else
             {

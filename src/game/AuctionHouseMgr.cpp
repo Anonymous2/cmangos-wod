@@ -83,12 +83,12 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction)
     if (!pItem)
         return;
 
-    ObjectGuid bidder_guid = ObjectGuid(HIGHGUID_PLAYER, auction->bidder);
+    ObjectGuid bidder_guid = ObjectGuid(GUIDTYPE_PLAYER, auction->bidder);
     Player* bidder = sObjectMgr.GetPlayer(bidder_guid);
 
     uint32 bidder_accId = 0;
 
-    ObjectGuid ownerGuid = ObjectGuid(HIGHGUID_PLAYER, auction->owner);
+    ObjectGuid ownerGuid = ObjectGuid(GUIDTYPE_PLAYER, auction->owner);
     Player* auction_owner = sObjectMgr.GetPlayer(ownerGuid);
 
     // data for gm.log
@@ -178,7 +178,7 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction)
 // call this method to send mail to auction owner, when auction is successful, it does not clear ram
 void AuctionHouseMgr::SendAuctionSuccessfulMail(AuctionEntry* auction)
 {
-    ObjectGuid owner_guid = ObjectGuid(HIGHGUID_PLAYER, auction->owner);
+    ObjectGuid owner_guid = ObjectGuid(GUIDTYPE_PLAYER, auction->owner);
     Player* owner = sObjectMgr.GetPlayer(owner_guid);
 
     uint32 owner_accId = 0;
@@ -227,7 +227,7 @@ void AuctionHouseMgr::SendAuctionExpiredMail(AuctionEntry* auction)
         return;
     }
 
-    ObjectGuid owner_guid = ObjectGuid(HIGHGUID_PLAYER, auction->owner);
+    ObjectGuid owner_guid = ObjectGuid(GUIDTYPE_PLAYER, auction->owner);
     Player* owner = sObjectMgr.GetPlayer(owner_guid);
 
     uint32 owner_accId = 0;
@@ -372,7 +372,7 @@ void AuctionHouseMgr::LoadAuctions()
             if (plWName.empty())
             {
                 std::string plName;
-                if (!sObjectMgr.GetPlayerNameByGUID(ObjectGuid(HIGHGUID_PLAYER, auction->owner), plName))
+                if (!sObjectMgr.GetPlayerNameByGUID(ObjectGuid(GUIDTYPE_PLAYER, auction->owner), plName))
                     plName = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
 
                 Utf8toWStr(plName, plWName);
@@ -441,7 +441,7 @@ void AuctionHouseMgr::LoadAuctions()
                 // item will deleted or added to received mail list
                 MailDraft(msgAuctionCanceledOwner.str(), "")// TODO: fix body
                 .AddItem(pItem)
-                .SendMailTo(MailReceiver(ObjectGuid(HIGHGUID_PLAYER, auction->owner)), auction, MAIL_CHECK_MASK_COPIED);
+                .SendMailTo(MailReceiver(ObjectGuid(GUIDTYPE_PLAYER, auction->owner)), auction, MAIL_CHECK_MASK_COPIED);
             }
 
             auction->DeleteFromDB();
@@ -957,12 +957,12 @@ bool AuctionEntry::BuildAuctionInfo(WorldPacket& data) const
     data << uint32(pItem->GetCount());                      // item->count
     data << uint32(pItem->GetSpellCharges());               // item->charge FFFFFFF
     data << uint32(0);                                      // item flags (dynamic?) (0x04 no lockId?)
-    data << ObjectGuid(HIGHGUID_PLAYER, owner);             // Auction->owner
+    data << ObjectGuid(GUIDTYPE_PLAYER, owner);             // Auction->owner
     data << uint64(startbid);                               // Auction->startbid (not sure if useful)
     data << uint64(bid ? GetAuctionOutBid() : 0);           // minimal outbid
     data << uint64(buyout);                                 // auction->buyout
     data << uint32((expireTime - time(NULL))*IN_MILLISECONDS); // time left
-    data << ObjectGuid(HIGHGUID_PLAYER, bidder);            // auction->bidder current
+    data << ObjectGuid(GUIDTYPE_PLAYER, bidder);            // auction->bidder current
     data << uint64(bid);                                    // current bid
     return true;
 }
@@ -1010,7 +1010,7 @@ void AuctionEntry::AuctionBidWinning(Player* newbidder)
 
 bool AuctionEntry::UpdateBid(uint64 newbid, Player* newbidder /*=NULL*/)
 {
-    Player* auction_owner = owner ? sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, owner)) : NULL;
+    Player* auction_owner = owner ? sObjectMgr.GetPlayer(ObjectGuid(GUIDTYPE_PLAYER, owner)) : NULL;
 
     // bid can't be greater buyout
     if (buyout && newbid > buyout)

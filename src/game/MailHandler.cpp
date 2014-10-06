@@ -472,7 +472,7 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recv_data)
             }
         }
 
-        draft.SetMoney(m->money).SendReturnToSender(GetAccountId(), m->receiverGuid, ObjectGuid(HIGHGUID_PLAYER, m->sender));
+        draft.SetMoney(m->money).SendReturnToSender(GetAccountId(), m->receiverGuid, ObjectGuid(GUIDTYPE_PLAYER, m->sender));
     }
 
     delete m;                                               // we can deallocate old mail
@@ -521,7 +521,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recv_data)
 
         if (m->COD > 0)                                     // if there is COD, take COD money from player and send them to sender by mail
         {
-            ObjectGuid sender_guid = ObjectGuid(HIGHGUID_PLAYER, m->sender);
+            ObjectGuid sender_guid = ObjectGuid(GUIDTYPE_PLAYER, m->sender);
             Player* sender = sObjectMgr.GetPlayer(sender_guid);
 
             uint32 sender_accId = 0;
@@ -668,7 +668,7 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
         switch ((*itr)->messageType)
         {
             case MAIL_NORMAL:                               // sender guid
-                data << ObjectGuid(HIGHGUID_PLAYER, (*itr)->sender);
+                data << ObjectGuid(GUIDTYPE_PLAYER, (*itr)->sender);
                 break;
             case MAIL_CREATURE:
             case MAIL_GAMEOBJECT:
@@ -787,7 +787,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recv_data)
     else
         bodyItem->SetText(m->body);
 
-    bodyItem->SetGuidValue(ITEM_FIELD_CREATOR, ObjectGuid(HIGHGUID_PLAYER, m->sender));
+    bodyItem->SetGuidValue(ITEM_FIELD_CREATOR, ObjectGuid(GUIDTYPE_PLAYER, m->sender));
     bodyItem->SetFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_READABLE | ITEM_DYNFLAG_UNK15 | ITEM_DYNFLAG_UNK16);
 
     DETAIL_LOG("HandleMailCreateTextItem mailid=%u", mailId);
@@ -815,7 +815,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket& recv_data)
  */
 void WorldSession::HandleQueryNextMailTime(WorldPacket& /**recv_data*/)
 {
-    WorldPacket data(MSG_QUERY_NEXT_MAIL_TIME, 8);
+    WorldPacket data(SMSG_MAIL_QUERY_NEXT_TIME_RESULT, 8);
 
     if (_player->unReadMails > 0)
     {
@@ -835,7 +835,7 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket& /**recv_data*/)
             if (now < m->deliver_time)
                 continue;
 
-            data << ObjectGuid(HIGHGUID_PLAYER, m->sender); // sender guid
+            data << ObjectGuid(GUIDTYPE_PLAYER, m->sender); // sender guid
 
             switch (m->messageType)
             {

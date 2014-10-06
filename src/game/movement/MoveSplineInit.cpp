@@ -99,7 +99,7 @@ namespace Movement
 
         if (transportInfo)
         {
-            data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
+            data.SetOpcode(SMSG_MONSTER_MOVE);
             data << transportInfo->GetTransportGuid().WriteAsPacked();
             data << int8(transportInfo->GetTransportSeat());
         }
@@ -149,7 +149,7 @@ namespace Movement
 
         if (transportInfo)
         {
-            data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
+            data.SetOpcode(SMSG_MONSTER_MOVE);
             data << transportInfo->GetTransportGuid().WriteAsPacked();
             data << int8(transportInfo->GetTransportSeat());
         }

@@ -209,7 +209,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recv_data)
     for (uint8 i = 1; i <= signs; ++i)
     {
         Field* fields2 = result->Fetch();
-        ObjectGuid signerGuid = ObjectGuid(HIGHGUID_PLAYER, fields2[0].GetUInt32());
+        ObjectGuid signerGuid = ObjectGuid(GUIDTYPE_PLAYER, fields2[0].GetUInt32());
 
         data << signerGuid;                                 // Player GUID
         data << uint32(0);                                  // there 0 ...
@@ -250,7 +250,7 @@ void WorldSession::SendPetitionQueryOpcode(ObjectGuid petitionguid)
     if (result)
     {
         Field* fields = result->Fetch();
-        ownerGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
+        ownerGuid = ObjectGuid(GUIDTYPE_PLAYER, fields[0].GetUInt32());
         name      = fields[1].GetCppString();
         signs     = fields[2].GetUInt8();
         delete result;
@@ -261,7 +261,7 @@ void WorldSession::SendPetitionQueryOpcode(ObjectGuid petitionguid)
         return;
     }
 
-    WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (4 + 8 + name.size() + 1 + 1 + 4 * 12 + 2 + 10));
+    WorldPacket data(SMSG_QUERY_PETITION_RESPONSE, (4 + 8 + name.size() + 1 + 1 + 4 * 12 + 2 + 10));
     data << uint32(petitionLowGuid);                        // guild/team guid (in mangos always same as GUID_LOPART(petition guid)
     data << ObjectGuid(ownerGuid);                          // charter owner guid
     data << name;                                           // name (guild/arena team)
@@ -328,7 +328,7 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket& recv_data)
 
     DEBUG_LOG("Petition %s renamed to '%s'", petitionGuid.GetString().c_str(), newname.c_str());
 
-    WorldPacket data(MSG_PETITION_RENAME, 8 + newname.size() + 1);
+    WorldPacket data(SMSG_PETITION_RENAME_GUILD_RESPONSE, 8 + newname.size() + 1);
     data << petitionGuid;
     data << newname;
     SendPacket(&data);
@@ -360,7 +360,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
 
     fields = result->Fetch();
     uint32 ownerLowGuid = fields[0].GetUInt32();
-    ObjectGuid ownerGuid = ObjectGuid(HIGHGUID_PLAYER, ownerLowGuid);
+    ObjectGuid ownerGuid = ObjectGuid(GUIDTYPE_PLAYER, ownerLowGuid);
     uint8 signs = fields[1].GetUInt8();
 
     delete result;
@@ -397,7 +397,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
     if (result)
     {
         fields = result->Fetch();
-        ObjectGuid playerGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
+        ObjectGuid playerGuid = ObjectGuid(GUIDTYPE_PLAYER, fields[0].GetUInt32());
         uint32 otherPetition = fields[1].GetUInt32();
         delete result;
         if (otherPetition == petitionGuid.GetCounter())
@@ -457,12 +457,12 @@ void WorldSession::HandlePetitionDeclineOpcode(WorldPacket& recv_data)
         return;
 
     Field* fields = result->Fetch();
-    ObjectGuid ownerguid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
+    ObjectGuid ownerguid = ObjectGuid(GUIDTYPE_PLAYER, fields[0].GetUInt32());
     delete result;
 
     if (Player* owner = sObjectMgr.GetPlayer(ownerguid))    // petition owner online
     {
-        WorldPacket data(MSG_PETITION_DECLINE, 8);
+        WorldPacket data(SMSG_PETITION_DECLINED, 8);
         data << _player->GetObjectGuid();
         owner->GetSession()->SendPacket(&data);
     }
@@ -527,7 +527,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket& recv_data)
     for (uint8 i = 1; i <= signs; ++i)
     {
         Field* fields2 = result->Fetch();
-        ObjectGuid signerGuid = ObjectGuid(HIGHGUID_PLAYER, fields2[0].GetUInt32());
+        ObjectGuid signerGuid = ObjectGuid(GUIDTYPE_PLAYER, fields2[0].GetUInt32());
 
         data << signerGuid;                                 // Player GUID
         data << uint32(0);                                  // there 0 ...
@@ -559,7 +559,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
     if (result)
     {
         Field* fields = result->Fetch();
-        ownerGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
+        ownerGuid = ObjectGuid(GUIDTYPE_PLAYER, fields[0].GetUInt32());
         name = fields[1].GetCppString();
         delete result;
     }
@@ -626,7 +626,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket& recv_data)
     {
         Field* fields = result->Fetch();
 
-        ObjectGuid signGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
+        ObjectGuid signGuid = ObjectGuid(GUIDTYPE_PLAYER, fields[0].GetUInt32());
         if (!signGuid)
             continue;
 
@@ -678,7 +678,7 @@ void WorldSession::SendPetitionShowList(ObjectGuid guid)
         return;
     }
 
-    WorldPacket data(SMSG_PETITION_SHOWLIST, 8 + 1 + 4 * 6);
+    WorldPacket data(SMSG_PETITION_SHOW_LIST, 8 + 1 + 4 * 6);
     data << guid;                                           // npc guid
     data << uint32(1);                                      // index
     data << uint32(GUILD_CHARTER);                          // charter entry

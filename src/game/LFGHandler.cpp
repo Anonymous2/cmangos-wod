@@ -243,7 +243,7 @@ void WorldSession::SendLfgJoinResult(LfgJoinResult result)
 
 void WorldSession::SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 id)
 {
-    WorldPacket data(isGroup ? SMSG_LFG_UPDATE_PARTY : SMSG_LFG_UPDATE_PLAYER, 0);
+    WorldPacket data(SMSG_LFG_UPDATE_STATUS, 0);
     data << uint8(updateType);
 
     uint8 extra = updateType == LFG_UPDATE_JOIN ? 1 : 0;

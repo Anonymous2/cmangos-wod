@@ -261,28 +261,60 @@ World::AddSession_(WorldSession* s)
         return;
     }
 
+    QueryResult* allwoedClasses = LoginDatabase.PQuery("SELECT class, expansion FROM realm_classes WHERE realmId = %u", realmID);
+    QueryResult* allowedRaces = LoginDatabase.PQuery("SELECT race, expansion FROM realm_races WHERE realmId = %u", realmID);
+
     WorldPacket packet(SMSG_AUTH_RESPONSE, 17);
 
-    packet.WriteBit(false);                                 // has queue
+    packet << uint8(AUTH_OK);
+
     packet.WriteBit(true);                                  // has account info
+    packet.WriteBit(false);                                 // has queue
 
     packet << uint32(0);                                    // Unknown - 4.3.2
+    packet << uint32(0);
+    packet << uint32(0);
+    packet << uint32(0);
+    packet << uint32(0);
     packet << uint8(s->Expansion());                        // 0 - normal, 1 - TBC, 2 - WotLK, 3 - CT. must be set in database manually for each account
-    packet << uint32(0);                                    // BillingTimeRemaining
     packet << uint8(s->Expansion());                        // 0 - normal, 1 - TBC, 2 - WotLK, 3 - CT. Must be set in database manually for each account.
-    packet << uint32(0);                                    // BillingTimeRested
-    packet << uint8(0);                                     // BillingPlanFlags
-    packet << uint8(AUTH_OK);
+    packet << uint32(0);                                    // BillingTimeRemaining
+    packet << uint32(allowedRaces->GetRowCount());                                    // BillingTimeRested
+    packet << uint32(allwoedClasses->GetRowCount());                                    // BillingTimeRested
+    packet << uint32(0);                                    // BillingTimeRemaining
+    packet << uint32(0);                                    // BillingTimeRemaining
+
+    do
+    {
+        Field* fields = allowedRaces->Fetch();
+
+        packet << fields[0].GetUInt8();
+        packet << fields[1].GetUInt8();
+    } while (allowedRaces->NextRow());
+
+    do
+    {
+        Field* fields = allwoedClasses->Fetch();
+
+        packet << fields[0].GetUInt8();
+        packet << fields[1].GetUInt8();
+    } while (allwoedClasses->NextRow());
+
+    packet.WriteBit(false);
+    packet.WriteBit(false);
+    packet.WriteBit(false);
+    packet.WriteBit(false);
+    packet.WriteBit(false);
 
     s->SendPacket(&packet);
 
-    s->SendAddonsInfo();
+    /*s->SendAddonsInfo();
 
     WorldPacket pkt(SMSG_CLIENTCACHE_VERSION, 4);
     pkt << uint32(getConfig(CONFIG_UINT32_CLIENTCACHE_VERSION));
     s->SendPacket(&pkt);
 
-    s->SendTutorialsData();
+    s->SendTutorialsData();*/
 
     UpdateMaxSessionCounters();
 
@@ -374,7 +406,7 @@ bool World::RemoveQueuedSession(WorldSession* sess)
         pop_sess->SendAuthWaitQue(0);
         pop_sess->SendAddonsInfo();
 
-        WorldPacket pkt(SMSG_CLIENTCACHE_VERSION, 4);
+        WorldPacket pkt(SMSG_CACHE_VERSION, 4);
         pkt << uint32(getConfig(CONFIG_UINT32_CLIENTCACHE_VERSION));
         pop_sess->SendPacket(&pkt);
 
@@ -953,7 +985,7 @@ void World::SetInitialWorldSettings()
     LoadConfigSettings();
 
     ///- Check the existence of the map files for all races start areas.
-    if (!MapManager::ExistMapAndVMap(0, -6240.32f, 331.033f) ||                     // Dwarf/ Gnome
+    /*if (!MapManager::ExistMapAndVMap(0, -6240.32f, 331.033f) ||                     // Dwarf/ Gnome
             !MapManager::ExistMapAndVMap(0, -8949.95f, -132.493f) ||                // Human
             !MapManager::ExistMapAndVMap(1, -618.518f, -4251.67f) ||                // Orc
             !MapManager::ExistMapAndVMap(0, 1676.35f, 1677.45f) ||                  // Scourge
@@ -968,7 +1000,7 @@ void World::SetInitialWorldSettings()
         sLog.outError("Correct *.map files not found in path '%smaps' or *.vmtree/*.vmtile files in '%svmaps'. Please place *.map and vmap files in appropriate directories or correct the DataDir value in the mangosd.conf file.", m_dataPath.c_str(), m_dataPath.c_str());
         Log::WaitBeforeContinueIfNeed();
         exit(1);
-    }
+    }*/
 
     ///- Loading strings. Getting no records means core load has to be canceled because no error message can be output.
     sLog.outString("Loading MaNGOS strings...");
@@ -1742,7 +1774,7 @@ void World::SendGlobalMessage(WorldPacket* packet)
 /// Sends a server message to the specified or all players
 void World::SendServerMessage(ServerMessageType type, const char* text /*=""*/, Player* player /*= NULL*/)
 {
-    WorldPacket data(SMSG_SERVER_MESSAGE, 50);              // guess size
+    WorldPacket data(SMSG_CHAT_SERVER_MESSAGE, 50);              // guess size
     data << uint32(type);
     data << text;
 

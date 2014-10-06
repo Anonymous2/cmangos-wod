@@ -6144,7 +6144,7 @@ bool ChatHandler::HandlePDumpLoadCommand(char* args)
                 return false;
             }
 
-            ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, lowguid);
+            ObjectGuid guid = ObjectGuid(GUIDTYPE_PLAYER, lowguid);
 
             if (sObjectMgr.GetPlayerAccountIdByGUID(guid))
             {
@@ -6216,7 +6216,7 @@ bool ChatHandler::HandlePDumpWriteCommand(char* args)
         lowguid = guid.GetCounter();
     }
     else
-        guid = ObjectGuid(HIGHGUID_PLAYER, lowguid);
+        guid = ObjectGuid(GUIDTYPE_PLAYER, lowguid);
 
     if (!sObjectMgr.GetPlayerAccountIdByGUID(guid))
     {

@@ -141,13 +141,15 @@ class CharacterHandler
 
 void WorldSession::HandleCharEnum(QueryResult * result)
 {
-    WorldPacket data(SMSG_CHAR_ENUM, 270);
+    WorldPacket data(SMSG_ENUM_CHARACTERS_RESULT, 270);
 
     ByteBuffer buffer;
 
-    data.WriteBits(0, 23);
     data.WriteBit(1);
-    data.WriteBits(result ? result->GetRowCount() : 0, 17);
+    data.WriteBit(0);
+
+    data << uint32(result ? result->GetRowCount() : 0);
+    data << uint32(0);
 
     if (result)
     {
@@ -163,14 +165,13 @@ void WorldSession::HandleCharEnum(QueryResult * result)
         }
         while (result->NextRow());
 
-        data.FlushBits();
         data.append(buffer);
     }
 
     SendPacket(&data);
 }
 
-void WorldSession::HandleCharEnumOpcode(WorldPacket& /*recv_data*/)
+void WorldSession::HandleEnumChar(WorldPacket& /*recv_data*/)
 {
     /// get all the data necessary for loading all characters (along with their pets) on the account
     CharacterDatabase.AsyncPQuery(&chrHandler, &CharacterHandler::HandleCharEnumCallback, GetAccountId(),
@@ -215,7 +216,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     recv_data >> gender >> skin >> face;
     recv_data >> hairStyle >> hairColor >> facialHair >> outfitId;
 
-    WorldPacket data(SMSG_CHAR_CREATE, 1);                  // returned with diff.values in all cases
+    WorldPacket data(SMSG_CREATE_CHAR, 1);                  // returned with diff.values in all cases
 
     if (GetSecurity() == SEC_PLAYER)
     {
@@ -505,7 +506,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
     // is guild leader
     if (sGuildMgr.GetGuildByLeader(guid))
     {
-        WorldPacket data(SMSG_CHAR_DELETE, 1);
+        WorldPacket data(SMSG_DELETE_CHAR, 1);
         data << (uint8)CHAR_DELETE_FAILED_GUILD_LEADER;
         SendPacket(&data);
         return;
@@ -514,7 +515,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
     // is arena team captain
     if (sObjectMgr.GetArenaTeamByCaptain(guid))
     {
-        WorldPacket data(SMSG_CHAR_DELETE, 1);
+        WorldPacket data(SMSG_DELETE_CHAR, 1);
         data << (uint8)CHAR_DELETE_FAILED_ARENA_CAPTAIN;
         SendPacket(&data);
         return;
@@ -549,7 +550,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
 
     Player::DeleteFromDB(guid, GetAccountId());
 
-    WorldPacket data(SMSG_CHAR_DELETE, 1);
+    WorldPacket data(SMSG_DELETE_CHAR, 1);
     data << (uint8)CHAR_DELETE_SUCCESS;
     SendPacket(&data);
 }
@@ -689,12 +690,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
         {
             pCurrChar->SetGuildLevel(guild->GetLevel());
 
-            data.Initialize(SMSG_GUILD_EVENT, (1+1+guild->GetMOTD().size()+1));
+            // Verify
+            data.Initialize(SMSG_GUILD_EVENT_MOTD, (1 + 1 + guild->GetMOTD().size() + 1));
             data << uint8(GE_MOTD);
             data << uint8(1);
             data << guild->GetMOTD();
             SendPacket(&data);
-            DEBUG_LOG( "WORLD: Sent guild-motd (SMSG_GUILD_EVENT)" );
+            DEBUG_LOG( "WORLD: Sent guild-motd (SMSG_GUILD_EVENT_MOTD)" );
 
             guild->DisplayGuildBankTabsInfo(this);
 
@@ -709,9 +711,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
         }
     }
 
-    data.Initialize(SMSG_LEARNED_DANCE_MOVES, 4+4);
+    // Removed?
+    /*data.Initialize(SMSG_LEARNED_DANCE_MOVES, 4+4);
     data << uint64(0);
-    SendPacket(&data);
+    SendPacket(&data);*/
 
     pCurrChar->SendInitialPacketsBeforeAddToMap();
 
@@ -941,7 +944,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recv_data)
     // prevent character rename to invalid name
     if (!normalizePlayerName(newname))
     {
-        WorldPacket data(SMSG_CHAR_RENAME, 1);
+        WorldPacket data(SMSG_CHARACTER_RENAME_RESULT, 1);
         data << uint8(CHAR_NAME_NO_NAME);
         SendPacket(&data);
         return;
@@ -950,7 +953,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recv_data)
     uint8 res = ObjectMgr::CheckPlayerName(newname, true);
     if (res != CHAR_NAME_SUCCESS)
     {
-        WorldPacket data(SMSG_CHAR_RENAME, 1);
+        WorldPacket data(SMSG_CHARACTER_RENAME_RESULT, 1);
         data << uint8(res);
         SendPacket(&data);
         return;
@@ -959,7 +962,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recv_data)
     // check name limitations
     if (GetSecurity() == SEC_PLAYER && sObjectMgr.IsReservedName(newname))
     {
-        WorldPacket data(SMSG_CHAR_RENAME, 1);
+        WorldPacket data(SMSG_CHARACTER_RENAME_RESULT, 1);
         data << uint8(CHAR_NAME_RESERVED);
         SendPacket(&data);
         return;
@@ -988,14 +991,14 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(QueryResult* result, uin
 
     if (!result)
     {
-        WorldPacket data(SMSG_CHAR_RENAME, 1);
+        WorldPacket data(SMSG_CHARACTER_RENAME_RESULT, 1);
         data << uint8(CHAR_CREATE_ERROR);
         session->SendPacket(&data);
         return;
     }
 
     uint32 guidLow = result->Fetch()[0].GetUInt32();
-    ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, guidLow);
+    ObjectGuid guid = ObjectGuid(GUIDTYPE_PLAYER, guidLow);
     std::string oldname = result->Fetch()[1].GetCppString();
 
     delete result;
@@ -1007,7 +1010,7 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(QueryResult* result, uin
 
     sLog.outChar("Account: %d (IP: %s) Character:[%s] (guid:%u) Changed name to: %s", session->GetAccountId(), session->GetRemoteAddress().c_str(), oldname.c_str(), guidLow, newname.c_str());
 
-    WorldPacket data(SMSG_CHAR_RENAME, 1 + 8 + (newname.size() + 1));
+    WorldPacket data(SMSG_CHARACTER_RENAME_RESULT, 1 + 8 + (newname.size() + 1));
     data << uint8(RESPONSE_SUCCESS);
     data << guid;
     data << newname;

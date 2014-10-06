@@ -1343,7 +1343,7 @@ bool Creature::CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, Team t
 {
     m_originalEntry = cinfo->Entry;
 
-    Object::_Create(guidlow, cinfo->Entry, cinfo->GetHighGuid());
+    Object::_Create(guidlow, cinfo->Entry, cinfo->GetGuidType());
 
     if (!UpdateEntry(cinfo->Entry, team, data, eventData, false))
         return false;
@@ -2668,7 +2668,7 @@ void Creature::SetWalk(bool enable, bool asDefault)
 
     if (IsInWorld())
     {
-        WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_WALK_MODE : SMSG_SPLINE_MOVE_SET_RUN_MODE, 9);
+        WorldPacket data(enable ? SMSG_MOVE_SPLINE_SET_WALK_MODE : SMSG_MOVE_SPLINE_SET_RUN_MODE, 9);
         if (enable)
         {
             data.WriteGuidMask<7, 6, 5, 1, 3, 4, 2, 0>(GetObjectGuid());
@@ -2693,7 +2693,7 @@ void Creature::SetLevitate(bool enable)
 
     if (IsInWorld())
     {
-        WorldPacket data(enable ? SMSG_SPLINE_MOVE_GRAVITY_DISABLE : SMSG_SPLINE_MOVE_GRAVITY_ENABLE, 9);
+        WorldPacket data(enable ? SMSG_MOVE_SPLINE_DISABLE_GRAVITY : SMSG_MOVE_SPLINE_ENABLE_GRAVITY, 9);
         if (enable)
         {
             data.WriteGuidMask<7, 3, 4, 2, 5, 1, 0, 6>(GetObjectGuid());
@@ -2718,7 +2718,7 @@ void Creature::SetRoot(bool enable)
 
     if (IsInWorld())
     {
-        WorldPacket data(enable ? SMSG_SPLINE_MOVE_ROOT : SMSG_SPLINE_MOVE_UNROOT, 9);
+        WorldPacket data(enable ? SMSG_MOVE_SPLINE_ROOT : SMSG_MOVE_SPLINE_UNROOT, 9);
         if (enable)
         {
             data.WriteGuidMask<5, 4, 6, 1, 3, 7, 2, 0>(GetObjectGuid());
@@ -2743,7 +2743,7 @@ void Creature::SetWaterWalk(bool enable)
 
     if (IsInWorld())
     {
-        WorldPacket data(enable ? SMSG_SPLINE_MOVE_WATER_WALK : SMSG_SPLINE_MOVE_LAND_WALK, 9);
+        WorldPacket data(enable ? SMSG_MOVE_SPLINE_SET_WATER_WALK : SMSG_MOVE_SPLINE_SET_LAND_WALK, 9);
         if (enable)
         {
             data.WriteGuidMask<6, 1, 4, 2, 3, 7, 5, 0>(GetObjectGuid());

@@ -57,7 +57,7 @@ void GMTicketMgr::LoadGMTickets()
         if (!guidlow)
             continue;
 
-        ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, guidlow);
+        ObjectGuid guid = ObjectGuid(GUIDTYPE_PLAYER, guidlow);
 
         GMTicket& ticket = m_GMTicketMap[guid];
 

@@ -443,7 +443,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
         if (result)
         {
             Field* fields = result->Fetch();
-            inviteeGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
+            inviteeGuid = ObjectGuid(GUIDTYPE_PLAYER, fields[0].GetUInt32());
             inviteeTeam = Player::TeamForRace(fields[1].GetUInt8());
             inviteeGuildId = Player::GetGuildIdFromDB(inviteeGuid);
             delete result;
@@ -712,7 +712,7 @@ void WorldSession::HandleCalendarComplain(WorldPacket& recv_data)
     // Remove the invite
     if (sCalendarMgr.RemoveInvite(eventId, inviteId, guid))
     {
-        WorldPacket data(SMSG_COMPLAIN_RESULT, 1 + 1);
+        WorldPacket data(SMSG_COMPLAINT_RESULT, 1 + 1);
         data << uint8(0);
         data << uint8(0); // show complain saved. We can send 0x0C to show windows with ok button
         SendPacket(&data);
@@ -933,8 +933,8 @@ void CalendarMgr::SendCalendarEventInviteRemoveAlert(Player* player, CalendarEve
 
 void CalendarMgr::SendCalendarEventStatus(CalendarInvite const* invite)
 {
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SMSG_CALENDAR_EVENT_STATUS");
-    WorldPacket data(SMSG_CALENDAR_EVENT_STATUS, 8 + 8 + 4 + 4 + 1 + 1 + 4);
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SMSG_CALENDAR_EVENT_INVITE_STATUS");
+    WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_STATUS, 8 + 8 + 4 + 4 + 1 + 1 + 4);
     CalendarEvent const* event = invite->GetCalendarEvent();
 
     data << invite->InviteeGuid.WriteAsPacked();
@@ -960,9 +960,9 @@ void CalendarMgr::SendCalendarClearPendingAction(Player* player)
 
 void CalendarMgr::SendCalendarEventModeratorStatusAlert(CalendarInvite const* invite)
 {
-    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SMSG_CALENDAR_EVENT_MODERATOR_STATUS_ALERT");
+    DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SMSG_CALENDAR_EVENT_INVITE_MODERATOR_STATUS");
     CalendarEvent const* event = invite->GetCalendarEvent();
-    WorldPacket data(SMSG_CALENDAR_EVENT_MODERATOR_STATUS_ALERT, 8 + 8 + 1 + 1);
+    WorldPacket data(SMSG_CALENDAR_EVENT_INVITE_MODERATOR_STATUS, 8 + 8 + 1 + 1);
     data << invite->InviteeGuid.WriteAsPacked();
     data << uint64(event->EventId);
     data << uint8(invite->Rank);

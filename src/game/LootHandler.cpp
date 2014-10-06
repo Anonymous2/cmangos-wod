@@ -43,9 +43,9 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 
     recv_data >> lootSlot;
 
-    switch (lguid.GetHigh())
+    switch (lguid.GetType())
     {
-        case HIGHGUID_GAMEOBJECT:
+        case GUIDTYPE_GAMEOBJECT:
         {
             GameObject* go = player->GetMap()->GetGameObject(lguid);
 
@@ -59,7 +59,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
             loot = &go->loot;
             break;
         }
-        case HIGHGUID_ITEM:
+        case GUIDTYPE_ITEM:
         {
             pItem = player->GetItemByGuid(lguid);
 
@@ -72,7 +72,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
             loot = &pItem->loot;
             break;
         }
-        case HIGHGUID_CORPSE:
+        case GUIDTYPE_CORPSE:
         {
             Corpse* bones = player->GetMap()->GetCorpse(lguid);
             if (!bones)
@@ -83,8 +83,8 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
             loot = &bones->loot;
             break;
         }
-        case HIGHGUID_UNIT:
-        case HIGHGUID_VEHICLE:
+        case GUIDTYPE_CREATURE:
+        case GUIDTYPE_VEHICLE:
         {
             Creature* pCreature = GetPlayer()->GetMap()->GetCreature(lguid);
 
@@ -199,9 +199,9 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
     Loot* pLoot = NULL;
     Item* pItem = NULL;
 
-    switch (guid.GetHigh())
+    switch (guid.GetType())
     {
-        case HIGHGUID_GAMEOBJECT:
+        case GUIDTYPE_GAMEOBJECT:
         {
             GameObject* pGameObject = GetPlayer()->GetMap()->GetGameObject(guid);
 
@@ -211,7 +211,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
 
             break;
         }
-        case HIGHGUID_CORPSE:                               // remove insignia ONLY in BG
+        case GUIDTYPE_CORPSE:                               // remove insignia ONLY in BG
         {
             Corpse* bones = _player->GetMap()->GetCorpse(guid);
 
@@ -220,7 +220,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
 
             break;
         }
-        case HIGHGUID_ITEM:
+        case GUIDTYPE_ITEM:
         {
             pItem = GetPlayer()->GetItemByGuid(guid);
             if (!pItem || !pItem->HasGeneratedLoot())
@@ -229,8 +229,8 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recv_data*/)
             pLoot = &pItem->loot;
             break;
         }
-        case HIGHGUID_UNIT:
-        case HIGHGUID_VEHICLE:
+        case GUIDTYPE_CREATURE:
+        case GUIDTYPE_VEHICLE:
         {
             Creature* pCreature = GetPlayer()->GetMap()->GetCreature(guid);
 
@@ -333,9 +333,9 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
     if (!player->IsInWorld())
         return;
 
-    switch (lguid.GetHigh())
+    switch (lguid.GetType())
     {
-        case HIGHGUID_GAMEOBJECT:
+        case GUIDTYPE_GAMEOBJECT:
         {
             GameObject* go = GetPlayer()->GetMap()->GetGameObject(lguid);
 
@@ -417,7 +417,7 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
                 go->SetLootState(GO_ACTIVATED);
             break;
         }
-        case HIGHGUID_CORPSE:                               // ONLY remove insignia at BG
+        case GUIDTYPE_CORPSE:                               // ONLY remove insignia at BG
         {
             Corpse* corpse = _player->GetMap()->GetCorpse(lguid);
             if (!corpse || !corpse->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
@@ -432,7 +432,7 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
             }
             break;
         }
-        case HIGHGUID_ITEM:
+        case GUIDTYPE_ITEM:
         {
             Item* pItem = player->GetItemByGuid(lguid);
             if (!pItem)
@@ -481,8 +481,8 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
             }
             return;                                         // item can be looted only single player
         }
-        case HIGHGUID_UNIT:
-        case HIGHGUID_VEHICLE:
+        case GUIDTYPE_CREATURE:
+        case GUIDTYPE_VEHICLE:
         {
             Creature* pCreature = GetPlayer()->GetMap()->GetCreature(lguid);
 

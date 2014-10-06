@@ -51,7 +51,6 @@
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
 #include "CreatureLinkingMgr.h"
-#include "movement/MovementStructures.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -74,371 +73,10 @@ float baseMoveSpeed[MAX_MOVE_TYPE] =
 
 void MovementInfo::Read(ByteBuffer& data, uint16 opcode)
 {
-    bool hasTransportData = false,
-        hasMovementFlags = false,
-        hasMovementFlags2 = false;
-
-    MovementStatusElements* sequence = GetMovementStatusElementsSequence(opcode);
-    if(!sequence)
-    {
-        sLog.outError("Unsupported MovementInfo::Read for 0x%X (%s)!", opcode, LookupOpcodeName(opcode));
-        return;
-    }
-
-    for(uint32 i = 0; i < MSE_COUNT; ++i)
-    {
-        MovementStatusElements element = sequence[i];
-        if (element == MSEEnd)
-            break;
-
-        if (element >= MSEGuidBit0 && element <= MSEGuidBit7)
-        {
-            guid[element - MSEGuidBit0] = data.ReadBit();
-            continue;
-        }
-
-        if (element >= MSETransportGuidBit0 && element <= MSETransportGuidBit7)
-        {
-            if (hasTransportData)
-                t_guid[element - MSETransportGuidBit0] = data.ReadBit();
-            continue;
-        }
-
-        if (element >= MSEGuidByte0 && element <= MSEGuidByte7)
-        {
-            if (guid[element - MSEGuidByte0])
-                guid[element - MSEGuidByte0] ^= data.ReadUInt8();
-            continue;
-        }
-
-        if (element >= MSETransportGuidByte0 && element <= MSETransportGuidByte7)
-        {
-            if (hasTransportData && t_guid[element - MSETransportGuidByte0])
-                t_guid[element - MSETransportGuidByte0] ^= data.ReadUInt8();
-            continue;
-        }
-
-        switch (element)
-        {
-            case MSEFlags:
-                if (hasMovementFlags)
-                    moveFlags = data.ReadBits(30);
-                break;
-            case MSEFlags2:
-                if (hasMovementFlags2)
-                    moveFlags2 = data.ReadBits(12);
-                break;
-            case MSEHasUnknownBit:
-                data.ReadBit();
-                break;
-            case MSETimestamp:
-                if (si.hasTimeStamp)
-                    data >> time;
-                break;
-            case MSEHasTimestamp:
-                si.hasTimeStamp = !data.ReadBit();
-                break;
-            case MSEHasOrientation:
-                si.hasOrientation = !data.ReadBit();
-                break;
-            case MSEHasMovementFlags:
-                hasMovementFlags = !data.ReadBit();
-                break;
-            case MSEHasMovementFlags2:
-                hasMovementFlags2 = !data.ReadBit();
-                break;
-            case MSEHasPitch:
-                si.hasPitch = !data.ReadBit();
-                break;
-            case MSEHasFallData:
-                si.hasFallData = data.ReadBit();
-                break;
-            case MSEHasFallDirection:
-                if (si.hasFallData)
-                    si.hasFallDirection = data.ReadBit();
-                break;
-            case MSEHasTransportData:
-                hasTransportData = data.ReadBit();
-                break;
-            case MSEHasTransportTime2:
-                if (hasTransportData)
-                    si.hasTransportTime2 = data.ReadBit();
-                break;
-            case MSEHasTransportTime3:
-                if (hasTransportData)
-                    si.hasTransportTime3 = data.ReadBit();
-                break;
-            case MSEHasSpline:
-                si.hasSpline = data.ReadBit();
-                break;
-            case MSEHasSplineElevation:
-                si.hasSplineElevation = !data.ReadBit();
-                break;
-            case MSEPositionX:
-                data >> pos.x;
-                break;
-            case MSEPositionY:
-                data >> pos.y;
-                break;
-            case MSEPositionZ:
-                data >> pos.z;
-                break;
-            case MSEPositionO:
-                if (si.hasOrientation)
-                    data >> pos.o;
-                break;
-            case MSEPitch:
-                if (si.hasPitch)
-                    data >> s_pitch;
-                break;;
-            case MSEFallTime:
-                if (si.hasFallData)
-                    data >> fallTime;
-                break;
-            case MSESplineElevation:
-                if (si.hasSplineElevation)
-                    data >> splineElevation;
-                break;
-            case MSEFallHorizontalSpeed:
-                if (si.hasFallData && si.hasFallDirection)
-                    data >> jump.xyspeed;
-                break;
-            case MSEFallVerticalSpeed:
-                if (si.hasFallData)
-                    data >> jump.velocity;
-                break;
-            case MSEFallCosAngle:
-                if (si.hasFallData && si.hasFallDirection)
-                    data >> jump.cosAngle;
-                break;
-            case MSEFallSinAngle:
-                if (si.hasFallData && si.hasFallDirection)
-                    data >> jump.sinAngle;
-                break;
-            case MSETransportSeat:
-                if (hasTransportData)
-                    data >> t_seat;
-                break;
-            case MSETransportPositionO:
-                if (hasTransportData)
-                    data >> t_pos.o;
-                break;
-            case MSETransportPositionX:
-                if (hasTransportData)
-                    data >> t_pos.x;
-                break;
-            case MSETransportPositionY:
-                if (hasTransportData)
-                    data >> t_pos.y;
-                break;
-            case MSETransportPositionZ:
-                if (hasTransportData)
-                    data >> t_pos.z;
-                break;
-            case MSETransportTime:
-                if (hasTransportData)
-                    data >> t_time;
-                break;
-            case MSETransportTime2:
-                if (hasTransportData && si.hasTransportTime2)
-                    data >> t_time2;
-                break;
-            case MSETransportTime3:
-                if (hasTransportData && si.hasTransportTime3)
-                    data >> fallTime;
-                break;
-            case MSEMovementCounter:
-                data.read_skip<uint32>();
-                break;
-            default:
-                MANGOS_ASSERT(false && "Wrong movement status element");
-                break;
-        }
-    }
 }
 
 void MovementInfo::Write(ByteBuffer& data, uint16 opcode) const
 {
-    bool hasTransportData = !t_guid.IsEmpty();
-
-    MovementStatusElements* sequence = GetMovementStatusElementsSequence(opcode);
-    if (!sequence)
-    {
-        sLog.outError("Unsupported MovementInfo::Write for 0x%X (%s)!", opcode, LookupOpcodeName(opcode));
-        return;
-    }
-
-    for(uint32 i = 0; i < MSE_COUNT; ++i)
-    {
-        MovementStatusElements element = sequence[i];
-
-        if (element == MSEEnd)
-            break;
-
-        if (element >= MSEGuidBit0 && element <= MSEGuidBit7)
-        {
-            data.WriteBit(guid[element - MSEGuidBit0]);
-            continue;
-        }
-
-        if (element >= MSETransportGuidBit0 && element <= MSETransportGuidBit7)
-        {
-            if (hasTransportData)
-                data.WriteBit(t_guid[element - MSETransportGuidBit0]);
-            continue;
-        }
-
-        if (element >= MSEGuidByte0 && element <= MSEGuidByte7)
-        {
-            if (guid[element - MSEGuidByte0])
-                data << uint8((guid[element - MSEGuidByte0] ^ 1));
-            continue;
-        }
-
-        if (element >= MSETransportGuidByte0 && element <= MSETransportGuidByte7)
-        {
-            if (hasTransportData && t_guid[element - MSETransportGuidByte0])
-                data << uint8((t_guid[element - MSETransportGuidByte0] ^ 1));
-            continue;
-        }
-
-        switch (element)
-        {
-            case MSEHasMovementFlags:
-                data.WriteBit(!moveFlags);
-                break;
-            case MSEHasMovementFlags2:
-                data.WriteBit(!moveFlags2);
-                break;
-            case MSEFlags:
-                if (moveFlags)
-                    data.WriteBits(moveFlags, 30);
-                break;
-            case MSEFlags2:
-                if (moveFlags2)
-                    data.WriteBits(moveFlags2, 12);
-                break;
-            case MSETimestamp:
-                if (si.hasTimeStamp)
-                    data << uint32(time);
-                break;
-            case MSEHasPitch:
-                data.WriteBit(!si.hasPitch);
-                break;
-            case MSEHasTimestamp:
-                data.WriteBit(!si.hasTimeStamp);
-                break;
-            case MSEHasUnknownBit:
-                data.WriteBit(false);
-                break;
-            case MSEHasFallData:
-                data.WriteBit(si.hasFallData);
-                break;
-            case MSEHasFallDirection:
-                if (si.hasFallData)
-                    data.WriteBit(si.hasFallDirection);
-                break;
-            case MSEHasTransportData:
-                data.WriteBit(hasTransportData);
-                break;
-            case MSEHasTransportTime2:
-                if (hasTransportData)
-                    data.WriteBit(si.hasTransportTime2);
-                break;
-            case MSEHasTransportTime3:
-                if (hasTransportData)
-                    data.WriteBit(si.hasTransportTime3);
-                break;
-            case MSEHasSpline:
-                data.WriteBit(si.hasSpline);
-                break;
-            case MSEHasSplineElevation:
-                data.WriteBit(!si.hasSplineElevation);
-                break;
-            case MSEPositionX:
-                data << float(pos.x);
-                break;
-            case MSEPositionY:
-                data << float(pos.y);
-                break;
-            case MSEPositionZ:
-                data << float(pos.z);
-                break;
-            case MSEPositionO:
-                if (si.hasOrientation)
-                    data << float(NormalizeOrientation(pos.o));
-                break;
-            case MSEPitch:
-                if (si.hasPitch)
-                    data << float(s_pitch);
-                break;
-            case MSEHasOrientation:
-                data.WriteBit(!si.hasOrientation);
-                break;
-            case MSEFallTime:
-                if (si.hasFallData)
-                    data << uint32(fallTime);
-                break;
-            case MSESplineElevation:
-                if (si.hasSplineElevation)
-                    data << float(splineElevation);
-                break;
-            case MSEFallHorizontalSpeed:
-                if (si.hasFallData && si.hasFallDirection)
-                    data << float(jump.xyspeed);
-                break;
-            case MSEFallVerticalSpeed:
-                if (si.hasFallData)
-                    data << float(jump.velocity);
-                break;
-            case MSEFallCosAngle:
-                if (si.hasFallData && si.hasFallDirection)
-                    data << float(jump.cosAngle);
-                break;
-            case MSEFallSinAngle:
-                if (si.hasFallData && si.hasFallDirection)
-                    data << float(jump.sinAngle);
-                break;
-            case MSETransportSeat:
-                if (hasTransportData)
-                    data << int8(t_seat);
-                break;
-            case MSETransportPositionO:
-                if (hasTransportData)
-                    data << float(NormalizeOrientation(t_pos.o));
-                break;
-            case MSETransportPositionX:
-                if (hasTransportData)
-                    data << float(t_pos.x);
-                break;
-            case MSETransportPositionY:
-                if (hasTransportData)
-                    data << float(t_pos.y);
-                break;
-            case MSETransportPositionZ:
-                if (hasTransportData)
-                    data << float(t_pos.z);
-                break;
-            case MSETransportTime:
-                if (hasTransportData)
-                    data << uint32(t_time);
-                break;
-            case MSETransportTime2:
-                if (hasTransportData && si.hasTransportTime2)
-                    data << uint32(t_time2);
-                break;
-            case MSETransportTime3:
-                if (hasTransportData && si.hasTransportTime3)
-                    data << uint32(fallTime);
-                break;
-            case MSEMovementCounter:
-                data << uint32(0);
-                break;
-            default:
-                MANGOS_ASSERT(false && "Wrong movement status element");
-                break;
-        }
-    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -727,7 +365,7 @@ bool Unit::haveOffhandWeapon() const
 void Unit::SendHeartBeat()
 {
     m_movementInfo.UpdateTime(WorldTimer::getMSTime());
-    WorldPacket data(MSG_MOVE_HEARTBEAT, 64);
+    WorldPacket data(SMSG_MOVE_UPDATE, 64);
     data << GetPackGUID();
     data << m_movementInfo;
     SendMessageToSet(&data, true);
@@ -1025,7 +663,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         {
             player_tap->ProcDamageAndSpell(pVictim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0);
 
-            WorldPacket data(SMSG_PARTYKILLLOG, (8 + 8));   // send event PARTY_KILL
+            WorldPacket data(SMSG_PARTY_KILL_LOG, (8 + 8));   // send event PARTY_KILL
             data << player_tap->GetObjectGuid();            // player with killing blow
             data << pVictim->GetObjectGuid();               // victim
 
@@ -2095,7 +1733,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
                 uint32 targetHealth = GetHealth();
                 uint32 overkill = damage > targetHealth ? damage - targetHealth : 0;
 
-                WorldPacket data(SMSG_SPELLDAMAGESHIELD, (8 + 8 + 4 + 4 + 4 + 4));
+                WorldPacket data(SMSG_SPELL_DAMAGE_SHIELD, (8 + 8 + 4 + 4 + 4 + 4));
                 data << pVictim->GetObjectGuid();
                 data << GetObjectGuid();
                 data << uint32(i_spellProto->Id);
@@ -3111,7 +2749,7 @@ float Unit::CalculateLevelPenalty(SpellEntry const* spellProto) const
 
 void Unit::SendMeleeAttackStart(Unit* pVictim)
 {
-    WorldPacket data(SMSG_ATTACKSTART, 8 + 8);
+    WorldPacket data(SMSG_ATTACK_START, 8 + 8);
     data << GetObjectGuid();
     data << pVictim->GetObjectGuid();
 
@@ -3124,7 +2762,7 @@ void Unit::SendMeleeAttackStop(Unit* victim)
     if (!victim)
         return;
 
-    WorldPacket data(SMSG_ATTACKSTOP, (4 + 16));            // we guess size
+    WorldPacket data(SMSG_ATTACK_STOP, (4 + 16));            // we guess size
     data << GetPackGUID();
     data << victim->GetPackGUID();                          // can be 0x00...
     data << uint32(0);                                      // can be 0x1
@@ -5473,7 +5111,7 @@ void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log)
     uint32 targetHealth = log->target->GetHealth();
     uint32 overkill = log->damage > targetHealth ? log->damage - targetHealth : 0;
 
-    WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (16 + 4 + 4 + 4 + 1 + 4 + 4 + 1 + 1 + 4 + 4 + 1)); // we guess size
+    WorldPacket data(SMSG_SPELL_NON_MELEE_DAMAGE_LOG, (16 + 4 + 4 + 4 + 1 + 4 + 4 + 1 + 1 + 4 + 4 + 1)); // we guess size
     data << log->target->GetPackGUID();
     data << log->attacker->GetPackGUID();
     data << uint32(log->SpellID);
@@ -5509,7 +5147,7 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
     Aura* aura = pInfo->aura;
     Modifier* mod = aura->GetModifier();
 
-    WorldPacket data(SMSG_PERIODICAURALOG, 30);
+    WorldPacket data(SMSG_SPELL_PERIODIC_AURA_LOG, 30);
     data << aura->GetTarget()->GetPackGUID();
     data << aura->GetCasterGuid().WriteAsPacked();
     data << uint32(aura->GetId());                          // spellId
@@ -5564,7 +5202,7 @@ void Unit::ProcDamageAndSpell(Unit* pVictim, uint32 procAttacker, uint32 procVic
 
 void Unit::SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo)
 {
-    WorldPacket data(SMSG_SPELLLOGMISS, (4 + 8 + 1 + 4 + 8 + 1));
+    WorldPacket data(SMSG_SPELL_MISS_LOG, (4 + 8 + 1 + 4 + 8 + 1));
     data << uint32(spellID);
     data << GetObjectGuid();
     data << uint8(0);                                       // can be 0 or 1, flag
@@ -5727,7 +5365,7 @@ FactionTemplateEntry const* Unit::getFactionTemplateEntry() const
         {
             guid = GetObjectGuid();
 
-            if (guid.GetHigh() == HIGHGUID_PET)
+            if (guid.GetType() == GUIDTYPE_PET)
                 sLog.outError("%s (base creature entry %u) have invalid faction template id %u, owner %s", GetGuidStr().c_str(), GetEntry(), getFaction(), ((Pet*)this)->GetOwnerGuid().GetString().c_str());
             else
                 sLog.outError("%s have invalid faction template id %u", GetGuidStr().c_str(), getFaction());
@@ -6545,7 +6183,7 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell, SpellEffectIndex eff)
 void Unit::SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, uint32 OverHeal, bool critical, uint32 absorb)
 {
     // we guess size
-    WorldPacket data(SMSG_SPELLHEALLOG, (8 + 8 + 4 + 4 + 1));
+    WorldPacket data(SMSG_SPELL_HEAL_LOG, (8 + 8 + 4 + 4 + 1));
     data << pVictim->GetPackGUID();
     data << GetPackGUID();
     data << uint32(SpellID);
@@ -6559,7 +6197,7 @@ void Unit::SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, uint32
 
 void Unit::SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype)
 {
-    WorldPacket data(SMSG_SPELLENERGIZELOG, (8 + 8 + 4 + 4 + 4 + 1));
+    WorldPacket data(SMSG_SPELL_ENERGIZE_LOG, (8 + 8 + 4 + 4 + 4 + 1));
     data << pVictim->GetPackGUID();
     data << GetPackGUID();
     data << uint32(SpellID);
@@ -9008,7 +8646,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
         {
             case MOVE_WALK:
             {
-                data.Initialize(SMSG_SPLINE_MOVE_SET_WALK_SPEED, 1 + 8 + 4);
+                data.Initialize(SMSG_MOVE_SPLINE_SET_WALK_SPEED, 1 + 8 + 4);
                 data.WriteGuidMask<0, 6, 7, 3, 5, 1, 2, 4>(guid);
                 data.WriteGuidBytes<0, 4, 7, 1, 5, 3>(guid);
                 data << float(GetSpeed(mtype));
@@ -9017,7 +8655,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
             }
             case MOVE_RUN:
             {
-                data.Initialize(SMSG_SPLINE_MOVE_SET_RUN_SPEED, 1 + 8 + 4);
+                data.Initialize(SMSG_MOVE_SPLINE_SET_RUN_SPEED, 1 + 8 + 4);
                 data.WriteGuidMask<4, 0, 5, 7, 6, 3, 1, 2>(guid);
                 data.WriteGuidBytes<0, 7, 6, 5, 3, 4>(guid);
                 data << float(GetSpeed(mtype));
@@ -9026,7 +8664,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
             }
             case MOVE_RUN_BACK:
             {
-                data.Initialize(SMSG_SPLINE_MOVE_SET_RUN_BACK_SPEED, 1 + 8 + 4);
+                data.Initialize(SMSG_MOVE_SPLINE_SET_RUN_BACK_SPEED, 1 + 8 + 4);
                 data.WriteGuidMask<1, 2, 6, 0, 3, 7, 5, 4>(guid);
                 data.WriteGuidBytes<1>(guid);
                 data << float(GetSpeed(mtype));
@@ -9035,7 +8673,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
             }
             case MOVE_SWIM:
             {
-                data.Initialize(SMSG_SPLINE_MOVE_SET_SWIM_SPEED, 1 + 8 + 4);
+                data.Initialize(SMSG_MOVE_SPLINE_SET_SWIM_SPEED, 1 + 8 + 4);
                 data.WriteGuidMask<4, 2, 5, 0, 7, 6, 3, 1>(guid);
                 data.WriteGuidBytes<5, 6, 1, 0, 2, 4>(guid);
                 data << float(GetSpeed(mtype));
@@ -9044,7 +8682,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
             }
             case MOVE_SWIM_BACK:
             {
-                data.Initialize(SMSG_SPLINE_MOVE_SET_SWIM_BACK_SPEED, 1 + 8 + 4);
+                data.Initialize(SMSG_MOVE_SPLINE_SET_SWIM_BACK_SPEED, 1 + 8 + 4);
                 data.WriteGuidMask<0, 1, 3, 6, 4, 5, 7, 2>(guid);
                 data.WriteGuidBytes<5, 3, 1, 0, 7, 6>(guid);
                 data << float(GetSpeed(mtype));
@@ -9053,7 +8691,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
             }
             case MOVE_TURN_RATE:
             {
-                data.Initialize(SMSG_SPLINE_MOVE_SET_TURN_RATE, 1 + 8 + 4);
+                data.Initialize(SMSG_MOVE_SPLINE_SET_TURN_RATE, 1 + 8 + 4);
                 data.WriteGuidMask<2, 4, 6, 1, 3, 5, 7, 0>(guid);
                 data << float(GetSpeed(mtype));
                 data.WriteGuidBytes<1, 5, 3, 2, 7, 4, 6, 0>(guid);
@@ -9061,7 +8699,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
             }
             case MOVE_FLIGHT:
             {
-                data.Initialize(SMSG_SPLINE_MOVE_SET_FLIGHT_SPEED, 1 + 8 + 4);
+                data.Initialize(SMSG_MOVE_SPLINE_SET_FLIGHT_SPEED, 1 + 8 + 4);
                 data.WriteGuidMask<7, 4, 0, 1, 3, 6, 5, 2>(guid);
                 data.WriteGuidBytes<0, 5, 4, 7, 3, 2, 1, 6>(guid);
                 data << float(GetSpeed(mtype));
@@ -9069,7 +8707,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
             }
             case MOVE_FLIGHT_BACK:
             {
-                data.Initialize(SMSG_SPLINE_MOVE_SET_FLIGHT_BACK_SPEED, 1 + 8 + 4);
+                data.Initialize(SMSG_MOVE_SPLINE_SET_FLIGHT_BACK_SPEED, 1 + 8 + 4);
                 data.WriteGuidMask<2, 1, 6, 5, 0, 3, 4, 7>(guid);
                 data.WriteGuidBytes<5>(guid);
                 data << float(GetSpeed(mtype));
@@ -9078,7 +8716,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced, bool ignore
             }
             case MOVE_PITCH_RATE:
             {
-                data.Initialize(SMSG_SPLINE_MOVE_SET_PITCH_RATE, 1 + 8 + 4);
+                data.Initialize(SMSG_MOVE_SPLINE_SET_PITCH_RATE, 1 + 8 + 4);
                 data.WriteGuidMask<3, 5, 6, 1, 0, 4, 7, 2>(guid);
                 data.WriteGuidBytes<1, 5, 7, 0, 6, 3, 2>(guid);
                 data << float(GetSpeed(mtype));
@@ -11051,7 +10689,7 @@ void Unit::SetStandState(uint8 state)
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        WorldPacket data(SMSG_STANDSTATE_UPDATE, 1);
+        WorldPacket data(SMSG_STAND_STATE_UPDATE, 1);
         data << (uint8)state;
         ((Player*)this)->GetSession()->SendPacket(&data);
     }
@@ -11100,7 +10738,7 @@ void Unit::ClearComboPointHolders()
     {
         uint32 lowguid = *m_ComboPointHolders.begin();
 
-        Player* plr = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, lowguid));
+        Player* plr = sObjectMgr.GetPlayer(ObjectGuid(GUIDTYPE_PLAYER, lowguid));
         if (plr && plr->GetComboTargetGuid() == GetObjectGuid())// recheck for safe
             plr->ClearComboPoints();                        // remove also guid from m_ComboPointHolders;
         else
@@ -11810,7 +11448,7 @@ void Unit::SetVehicleId(uint32 entry, uint32 overwriteNpcEntry)
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        WorldPacket data(SMSG_SET_VEHICLE_REC_ID, 16);
+        WorldPacket data(SMSG_MOVE_SET_VEHICLE_REC_ID, 16);
         data << GetPackGUID();
         data << uint32(entry);
         SendMessageToSet(&data, true);
@@ -11878,7 +11516,7 @@ void Unit::BuildForceMoveRootPacket(WorldPacket* data, bool apply, uint32 value)
 {
     if (apply)
     {
-        data->Initialize(SMSG_FORCE_MOVE_ROOT, 13);
+        data->Initialize(SMSG_MOVE_ROOT, 13);
         data->WriteGuidMask<2, 7, 6, 0, 5, 4, 1, 3>(GetObjectGuid());
         data->WriteGuidBytes<1, 0, 2, 5>(GetObjectGuid());
         *data << uint32(value);
@@ -11886,7 +11524,7 @@ void Unit::BuildForceMoveRootPacket(WorldPacket* data, bool apply, uint32 value)
     }
     else
     {
-        data->Initialize(SMSG_FORCE_MOVE_UNROOT, 13);
+        data->Initialize(SMSG_MOVE_UNROOT, 13);
         data->WriteGuidMask<0, 1, 3, 7, 5, 2, 4, 6>(GetObjectGuid());
         data->WriteGuidBytes<3, 6, 1>(GetObjectGuid());
         *data << uint32(value);
@@ -11929,7 +11567,7 @@ void Unit::BuildMoveWaterWalkPacket(WorldPacket* data, bool apply, uint32 value)
 {
     if (apply)
     {
-        data->Initialize(SMSG_MOVE_WATER_WALK, 13);
+        data->Initialize(SMSG_MOVE_SET_WATER_WALK, 13);
         data->WriteGuidMask<4, 7, 6, 0, 1, 3, 5, 2>(GetObjectGuid());
         data->WriteGuidBytes<0, 5, 2>(GetObjectGuid());
         *data << uint32(value);
@@ -11937,7 +11575,7 @@ void Unit::BuildMoveWaterWalkPacket(WorldPacket* data, bool apply, uint32 value)
     }
     else
     {
-        data->Initialize(SMSG_MOVE_LAND_WALK, 13);
+        data->Initialize(SMSG_MOVE_SET_LAND_WALK, 13);
         data->WriteGuidMask<5, 1, 6, 2, 3, 4, 0, 7>(GetObjectGuid());
         data->WriteGuidBytes<6, 1, 7, 5, 4, 0, 3, 2>(GetObjectGuid());
         *data << uint32(value);
@@ -11950,7 +11588,7 @@ void Unit::BuildMoveFeatherFallPacket(WorldPacket* data, bool apply, uint32 valu
 
     if (apply)
     {
-        data->Initialize(SMSG_MOVE_FEATHER_FALL, 1 + 4 + 8);
+        data->Initialize(SMSG_MOVE_SET_FEATHER_FALL, 1 + 4 + 8);
         data->WriteGuidMask<3, 1, 7, 0, 4, 2, 5, 6>(guid);
         data->WriteGuidBytes<5, 7, 2>(guid);
         *data << uint32(value);
@@ -11958,7 +11596,7 @@ void Unit::BuildMoveFeatherFallPacket(WorldPacket* data, bool apply, uint32 valu
     }
     else
     {
-        data->Initialize(SMSG_MOVE_NORMAL_FALL, 1 + 4 + 8);
+        data->Initialize(SMSG_MOVE_SET_NORMAL_FALL, 1 + 4 + 8);
         *data << uint32(value);
         data->WriteGuidMask<3, 0, 1, 5, 7, 4, 6, 2>(guid);
         data->WriteGuidBytes<2, 7, 1, 4, 5, 0, 3, 6>(guid);

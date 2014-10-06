@@ -68,7 +68,7 @@ void Corpse::RemoveFromWorld()
 
 bool Corpse::Create(uint32 guidlow)
 {
-    Object::_Create(guidlow, 0, HIGHGUID_CORPSE);
+    Object::_Create(guidlow, 0, GUIDTYPE_CORPSE);
     return true;
 }
 
@@ -76,7 +76,7 @@ bool Corpse::Create(uint32 guidlow, Player* owner)
 {
     MANGOS_ASSERT(owner);
 
-    WorldObject::_Create(guidlow, HIGHGUID_CORPSE, owner->GetPhaseMask());
+    WorldObject::_Create(guidlow, GUIDTYPE_CORPSE, owner->GetPhaseMask());
     Relocate(owner->GetPositionX(), owner->GetPositionY(), owner->GetPositionZ(), owner->GetOrientation());
 
     // we need to assign owner's map for corpse
@@ -163,7 +163,7 @@ bool Corpse::LoadFromDB(uint32 lowguid, Field* fields)
     float orientation   = fields[5].GetFloat();
     uint32 mapid        = fields[6].GetUInt32();
 
-    Object::_Create(lowguid, 0, HIGHGUID_CORPSE);
+    Object::_Create(lowguid, 0, GUIDTYPE_CORPSE);
 
     m_time = time_t(fields[7].GetUInt64());
     m_type = CorpseType(fields[8].GetUInt32());
@@ -184,8 +184,8 @@ bool Corpse::LoadFromDB(uint32 lowguid, Field* fields)
     uint32 guildId      = fields[17].GetUInt32();
     uint32 playerFlags  = fields[18].GetUInt32();
 
-    ObjectGuid guid = ObjectGuid(HIGHGUID_CORPSE, lowguid);
-    ObjectGuid playerGuid = ObjectGuid(HIGHGUID_PLAYER, playerLowGuid);
+    ObjectGuid guid = ObjectGuid(GUIDTYPE_CORPSE, lowguid);
+    ObjectGuid playerGuid = ObjectGuid(GUIDTYPE_PLAYER, playerLowGuid);
 
     // overwrite possible wrong/corrupted guid
     SetGuidValue(OBJECT_FIELD_GUID, guid);

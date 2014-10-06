@@ -292,7 +292,7 @@ void Spell::EffectInstaKill(SpellEffectEntry const* /*effect*/)
 
     WorldObject* caster = GetCastingObject();               // we need the original casting object
 
-    WorldPacket data(SMSG_SPELLINSTAKILLLOG, (8 + 8 + 4));
+    WorldPacket data(SMSG_SPELL_INSTAKILL_LOG, (8 + 8 + 4));
     data << (caster && caster->GetTypeId() != TYPEID_GAMEOBJECT ? m_caster->GetObjectGuid() : ObjectGuid()); // Caster GUID
     data << unitTarget->GetObjectGuid();                    // Victim GUID
     data << uint32(m_spellInfo->Id);
@@ -1050,7 +1050,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
 
                     Map* map = unitTarget->GetMap();
 
-                    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), 177704,
+                    if (!pGameObj->Create(map->GenerateLocalLowGuid(GUIDTYPE_GAMEOBJECT), 177704,
                                           map, m_caster->GetPhaseMask(),
                                           unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(),
                                           unitTarget->GetOrientation()))
@@ -1122,7 +1122,7 @@ void Spell::EffectDummy(SpellEffectEntry const* effect)
                     Map* map = creatureTarget->GetMap();
 
                     // create before death for get proper coordinates
-                    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), 179644, map, m_caster->GetPhaseMask(),
+                    if (!pGameObj->Create(map->GenerateLocalLowGuid(GUIDTYPE_GAMEOBJECT), 179644, map, m_caster->GetPhaseMask(),
                                           creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(),
                                           creatureTarget->GetOrientation()))
                     {
@@ -4848,7 +4848,7 @@ void Spell::EffectPersistentAA(SpellEffectEntry const* effect)
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius);
 
     DynamicObject* dynObj = new DynamicObject;
-    if (!dynObj->Create(pCaster->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), pCaster, m_spellInfo->Id, SpellEffectIndex(effect->EffectIndex), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_duration, radius, DYNAMIC_OBJECT_AREA_SPELL))
+    if (!dynObj->Create(pCaster->GetMap()->GenerateLocalLowGuid(GUIDTYPE_DYNAMICOBJECT), pCaster, m_spellInfo->Id, SpellEffectIndex(effect->EffectIndex), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_duration, radius, DYNAMIC_OBJECT_AREA_SPELL))
     {
         delete dynObj;
         return;
@@ -5470,7 +5470,7 @@ bool Spell::DoSummonCritter(CreatureSummonPositions& list, SummonPropertiesEntry
     Pet* critter = new Pet(MINI_PET);
 
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
-    if (!critter->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_PET), pos, cInfo, pet_number))
+    if (!critter->Create(m_caster->GetMap()->GenerateLocalLowGuid(GUIDTYPE_PET), pos, cInfo, pet_number))
     {
         sLog.outError("Spell::EffectSummonCritter, spellid %u: no such creature entry %u", m_spellInfo->Id, pet_entry);
         delete critter;
@@ -5544,7 +5544,7 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
         CreatureCreatePos pos(m_caster->GetMap(), itr->x, itr->y, itr->z, -m_caster->GetOrientation(), m_caster->GetPhaseMask());
 
         uint32 pet_number = sObjectMgr.GeneratePetNumber();
-        if (!spawnCreature->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_PET), pos, cInfo, pet_number))
+        if (!spawnCreature->Create(m_caster->GetMap()->GenerateLocalLowGuid(GUIDTYPE_PET), pos, cInfo, pet_number))
         {
             sLog.outError("Spell::DoSummonGuardian: can't create creature entry %u for spell %u.", pet_entry, m_spellInfo->Id);
             delete spawnCreature;
@@ -5601,7 +5601,7 @@ bool Spell::DoSummonTotem(SpellEffectEntry const* effect, uint8 slot_dbc)
 
     Totem* pTotem = new Totem;
 
-    if (!pTotem->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, cinfo, m_caster))
+    if (!pTotem->Create(m_caster->GetMap()->GenerateLocalLowGuid(GUIDTYPE_CREATURE), pos, cinfo, m_caster))
     {
         delete pTotem;
         return false;
@@ -5749,7 +5749,7 @@ bool Spell::DoSummonPet(SpellEffectEntry const* effect)
 
     Map* map = m_caster->GetMap();
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
-    if (!spawnCreature->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), pos, cInfo, pet_number))
+    if (!spawnCreature->Create(map->GenerateLocalLowGuid(GUIDTYPE_PET), pos, cInfo, pet_number))
     {
         sLog.outErrorDb("Spell::EffectSummon: can't create creature with entry %u for spell %u", cInfo->Entry, m_spellInfo->Id);
         delete spawnCreature;
@@ -5970,7 +5970,7 @@ void Spell::EffectDispel(SpellEffectEntry const* effect)
         if (!success_list.empty())
         {
             int32 count = success_list.size();
-            WorldPacket data(SMSG_SPELLDISPELLOG, 8 + 8 + 4 + 1 + 4 + count * 5);
+            WorldPacket data(SMSG_SPELL_DISPELL_LOG, 8 + 8 + 4 + 1 + 4 + count * 5);
             data << unitTarget->GetPackGUID();              // Victim GUID
             data << m_caster->GetPackGUID();                // Caster GUID
             data << uint32(m_spellInfo->Id);                // Dispel spell id
@@ -6075,7 +6075,7 @@ void Spell::EffectAddFarsight(SpellEffectEntry const* effect)
     DynamicObject* dynObj = new DynamicObject;
 
     // set radius to 0: spell not expected to work as persistent aura
-    if(!dynObj->Create(m_caster->GetMap()->GenerateLocalLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, SpellEffectIndex(effect->EffectIndex), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, 0, DYNAMIC_OBJECT_FARSIGHT_FOCUS))
+    if(!dynObj->Create(m_caster->GetMap()->GenerateLocalLowGuid(GUIDTYPE_DYNAMICOBJECT), m_caster, m_spellInfo->Id, SpellEffectIndex(effect->EffectIndex), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, 0, DYNAMIC_OBJECT_FARSIGHT_FOCUS))
     {
         delete dynObj;
         return;
@@ -6494,7 +6494,7 @@ void Spell::EffectSummonPet(SpellEffectEntry const* effect)
 
     Map* map = m_caster->GetMap();
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
-    if (!NewSummon->Create(map->GenerateLocalLowGuid(HIGHGUID_PET), pos, cInfo, pet_number))
+    if (!NewSummon->Create(map->GenerateLocalLowGuid(GUIDTYPE_PET), pos, cInfo, pet_number))
     {
         delete NewSummon;
         return;
@@ -6983,7 +6983,7 @@ void Spell::EffectSummonObjectWild(SpellEffectEntry const* effect)
 
     Map* map = target->GetMap();
 
-    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, map,
+    if (!pGameObj->Create(map->GenerateLocalLowGuid(GUIDTYPE_GAMEOBJECT), gameobject_id, map,
                           m_caster->GetPhaseMask(), x, y, z, target->GetOrientation()))
     {
         delete pGameObj;
@@ -9669,7 +9669,7 @@ void Spell::EffectDuel(SpellEffectEntry const* effect)
     float y = (m_caster->GetPositionY() + unitTarget->GetPositionY()) * 0.5f;
     float z = m_caster->GetPositionZ();
     m_caster->UpdateAllowedPositionZ(x, y, z);
-    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, map, m_caster->GetPhaseMask(), x, y, z, m_caster->GetOrientation()))
+    if (!pGameObj->Create(map->GenerateLocalLowGuid(GUIDTYPE_GAMEOBJECT), gameobject_id, map, m_caster->GetPhaseMask(), x, y, z, m_caster->GetOrientation()))
     {
         delete pGameObj;
         return;
@@ -10113,7 +10113,7 @@ void Spell::EffectSummonObject(SpellEffectEntry const* effect)
         m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
 
     Map* map = m_caster->GetMap();
-    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), go_id, map,
+    if (!pGameObj->Create(map->GenerateLocalLowGuid(GUIDTYPE_GAMEOBJECT), go_id, map,
                           m_caster->GetPhaseMask(), x, y, z, m_caster->GetOrientation()))
     {
         delete pGameObj;
@@ -10640,7 +10640,7 @@ void Spell::EffectTransmitted(SpellEffectEntry const* effect)
 
     GameObject* pGameObj = new GameObject;
 
-    if (!pGameObj->Create(cMap->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), name_id, cMap,
+    if (!pGameObj->Create(cMap->GenerateLocalLowGuid(GUIDTYPE_GAMEOBJECT), name_id, cMap,
                           m_caster->GetPhaseMask(), fx, fy, fz, m_caster->GetOrientation()))
     {
         delete pGameObj;
@@ -10822,7 +10822,7 @@ void Spell::EffectStealBeneficialBuff(SpellEffectEntry const* effect)
             }
         }
         // Really try steal and send log
-        if (!success_list.empty())
+        /*if (!success_list.empty())
         {
             int32 count = success_list.size();
             WorldPacket data(SMSG_SPELLSTEALLOG, 8 + 8 + 4 + 1 + 4 + count * 5);
@@ -10839,7 +10839,7 @@ void Spell::EffectStealBeneficialBuff(SpellEffectEntry const* effect)
                 unitTarget->RemoveAurasDueToSpellBySteal(spellInfo->Id, j->second, m_caster);
             }
             m_caster->SendMessageToSet(&data, true);
-        }
+        }*/
     }
 }
 
@@ -11077,7 +11077,7 @@ void Spell::EffectBind(SpellEffectEntry const* effect)
     player->SetHomebindToLocation(loc, area_id);
 
     // binding
-    WorldPacket data(SMSG_BINDPOINTUPDATE, (4 + 4 + 4 + 4 + 4));
+    WorldPacket data(SMSG_BIND_POINT_UPDATE, (4 + 4 + 4 + 4 + 4));
     data << float(loc.coord_x);
     data << float(loc.coord_y);
     data << float(loc.coord_z);
@@ -11088,7 +11088,7 @@ void Spell::EffectBind(SpellEffectEntry const* effect)
     DEBUG_LOG("New Home Position for %s: XYZ: %f %f %f on Map %u", player->GetGuidStr().c_str(), loc.coord_x, loc.coord_y, loc.coord_z, loc.mapid);
 
     // zone update
-    data.Initialize(SMSG_PLAYERBOUND, 8 + 4);
+    data.Initialize(SMSG_PLAYER_BOUND, 8 + 4);
     data << m_caster->GetObjectGuid();
     data << uint32(area_id);
     player->SendDirectMessage(&data);
@@ -11146,7 +11146,7 @@ void Spell::EffectTeachTaxiNode(SpellEffectEntry const* effect)
         WorldPacket data(SMSG_NEW_TAXI_PATH, 0);
         player->SendDirectMessage(&data);
 
-        data.Initialize(SMSG_TAXINODE_STATUS, 9);
+        data.Initialize(SMSG_TAXI_NODE_STATUS, 9);
         data << m_caster->GetObjectGuid();
         data << uint8(1);
         player->SendDirectMessage(&data);

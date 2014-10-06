@@ -493,7 +493,7 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
 
     if (Player* pPlayer = ObjectAccessor::FindPlayer(_player->GetDividerGuid()))
     {
-        WorldPacket data(MSG_QUEST_PUSH_RESULT, (8 + 1));
+        WorldPacket data(SMSG_QUEST_PUSH_RESULT, (8 + 1));
         data << ObjectGuid(guid);
         data << uint8(msg);                             // valid values: 0-8
         pPlayer->GetSession()->SendPacket(&data);
@@ -614,7 +614,7 @@ void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket
 
     uint32 count = 0;
 
-    WorldPacket data(SMSG_QUESTGIVER_STATUS_MULTIPLE, 4);
+    WorldPacket data(SMSG_QUEST_GIVER_STATUS_MULTIPLE, 4);
     data << uint32(count);                                  // placeholder
 
     for (GuidSet::const_iterator itr = _player->m_clientGUIDs.begin(); itr != _player->m_clientGUIDs.end(); ++itr)

@@ -1181,15 +1181,15 @@ class ObjectMgr
         uint32 m_FirstTemporaryGameObjectGuid;
 
         // guids from reserved range for use in .npc add/.gobject add commands for adding new static spawns (saved in DB) from client.
-        ObjectGuidGenerator<HIGHGUID_UNIT>        m_StaticCreatureGuids;
-        ObjectGuidGenerator<HIGHGUID_GAMEOBJECT>  m_StaticGameObjectGuids;
+        ObjectGuidGenerator<GUIDTYPE_CREATURE>        m_StaticCreatureGuids;
+        ObjectGuidGenerator<GUIDTYPE_GAMEOBJECT>  m_StaticGameObjectGuids;
 
         // first free low guid for selected guid type
-        ObjectGuidGenerator<HIGHGUID_PLAYER>     m_CharGuids;
-        ObjectGuidGenerator<HIGHGUID_ITEM>       m_ItemGuids;
-        ObjectGuidGenerator<HIGHGUID_CORPSE>     m_CorpseGuids;
-        ObjectGuidGenerator<HIGHGUID_INSTANCE>   m_InstanceGuids;
-        ObjectGuidGenerator<HIGHGUID_GROUP>      m_GroupGuids;
+        ObjectGuidGenerator<GUIDTYPE_PLAYER>     m_CharGuids;
+        ObjectGuidGenerator<GUIDTYPE_ITEM>       m_ItemGuids;
+        ObjectGuidGenerator<GUIDTYPE_CORPSE>     m_CorpseGuids;
+        ObjectGuidGenerator<GUIDTYPE_RAIDGROUP>   m_InstanceGuids;
+        ObjectGuidGenerator<GUIDTYPE_PARTY>      m_GroupGuids;
 
         QuestMap            mQuestTemplates;
 

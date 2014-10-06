@@ -1,20 +1,20 @@
 /*
- * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+* This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
 
 #include "WorldSession.h"
 #include "WorldPacket.h"
@@ -198,12 +198,12 @@ void WorldSession::HandleArenaTeamInviteOpcode(WorldPacket& recv_data)
 
     player->SetArenaTeamIdInvited(arenateam->GetId());
 
-    WorldPacket data(SMSG_ARENA_TEAM_INVITE, (8 + 10));
+    /*WorldPacket data(SMSG_ARENA_TEAM_INVITE, (8 + 10));
     data << GetPlayer()->GetName();
     data << arenateam->GetName();
     player->GetSession()->SendPacket(&data);
 
-    DEBUG_LOG("WORLD: Sent SMSG_ARENA_TEAM_INVITE");
+    DEBUG_LOG("WORLD: Sent SMSG_ARENA_TEAM_INVITE");*/
 }
 
 void WorldSession::HandleArenaTeamAcceptOpcode(WorldPacket& /*recv_data*/)
@@ -222,7 +222,7 @@ void WorldSession::HandleArenaTeamAcceptOpcode(WorldPacket& /*recv_data*/)
     }
 
     if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GUILD) &&
-            _player->GetTeam() != sObjectMgr.GetPlayerTeamByGUID(at->GetCaptainGuid()))
+        _player->GetTeam() != sObjectMgr.GetPlayerTeamByGUID(at->GetCaptainGuid()))
     {
         // not let enemies sign petition
         SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, "", "", ERR_ARENA_TEAM_NOT_ALLIED);
@@ -385,7 +385,7 @@ void WorldSession::HandleArenaTeamLeaderOpcode(WorldPacket& recv_data)
 
 void WorldSession::SendArenaTeamCommandResult(uint32 team_action, const std::string& team, const std::string& player, uint32 error_id)
 {
-    DEBUG_LOG("Sent SMSG_ARENA_TEAM_COMMAND_RESULT");
+    /*DEBUG_LOG("Sent SMSG_ARENA_TEAM_COMMAND_RESULT");
     WorldPacket data(SMSG_ARENA_TEAM_COMMAND_RESULT, 4 + team.length() + 1 + player.length() + 1 + 4);
     data.WriteBits(player.length(), 7);
     data.WriteBits(team.length(), 8);
@@ -394,7 +394,7 @@ void WorldSession::SendArenaTeamCommandResult(uint32 team_action, const std::str
     data << uint32(team_action);
     data << uint32(error_id);
     data.append(team.data(), team.length());
-    SendPacket(&data);
+    SendPacket(&data);*/
 }
 
 void WorldSession::SendNotInArenaTeamPacket(uint8 type)

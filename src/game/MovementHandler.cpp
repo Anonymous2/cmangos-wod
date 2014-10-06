@@ -303,7 +303,7 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
 {
-    Opcodes opcode = recv_data.GetOpcode();
+    uint16 opcode = recv_data.GetOpcode();
     if (!sLog.HasLogFilter(LOG_FILTER_PLAYER_MOVES))
     {
         DEBUG_LOG("WORLD: Received opcode %s (%u, 0x%X)", LookupOpcodeName(opcode), opcode, opcode);
@@ -338,14 +338,14 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     if (plMover)
         plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
-    WorldPacket data(SMSG_PLAYER_MOVE, recv_data.size());
+    WorldPacket data(SMSG_MOVE_UPDATE, recv_data.size());
     data << movementInfo;
     mover->SendMessageToSetExcept(&data, _player);
 }
 
 void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data)
 {
-    Opcodes opcode = recv_data.GetOpcode();
+    uint16 opcode = recv_data.GetOpcode();
     DEBUG_LOG("WORLD: Received %s (%u, 0x%X) opcode", recv_data.GetOpcodeName(), opcode, opcode);
 
     /* extract packet */
@@ -455,7 +455,7 @@ void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvdata*/)
 {
     // DEBUG_LOG("WORLD: Received opcode CMSG_MOUNTSPECIAL_ANIM");
 
-    WorldPacket data(SMSG_MOUNTSPECIAL_ANIM, 8);
+    WorldPacket data(SMSG_SPECIAL_MOUNT_ANIM, 8);
     data << GetPlayer()->GetObjectGuid();
 
     GetPlayer()->SendMessageToSet(&data, false);
@@ -483,7 +483,7 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recv_data)
 
     HandleMoverRelocation(movementInfo);
 
-    WorldPacket data(SMSG_MOVE_UPDATE_KNOCK_BACK, recv_data.size() + 15);
+    WorldPacket data(SMSG_MOVE_UPDATE_KNOCKBACK, recv_data.size() + 15);
     data << movementInfo;
     mover->SendMessageToSetExcept(&data, _player);
 }

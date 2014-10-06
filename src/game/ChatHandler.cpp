@@ -65,19 +65,19 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
 
     switch (recv_data.GetOpcode())
     {
-        case CMSG_MESSAGECHAT_SAY:          type = CHAT_MSG_SAY;            break;
-        case CMSG_MESSAGECHAT_YELL:         type = CHAT_MSG_YELL;           break;
-        case CMSG_MESSAGECHAT_CHANNEL:      type = CHAT_MSG_CHANNEL;        break;
-        case CMSG_MESSAGECHAT_WHISPER:      type = CHAT_MSG_WHISPER;        break;
-        case CMSG_MESSAGECHAT_GUILD:        type = CHAT_MSG_GUILD;          break;
-        case CMSG_MESSAGECHAT_OFFICER:      type = CHAT_MSG_OFFICER;        break;
-        case CMSG_MESSAGECHAT_AFK:          type = CHAT_MSG_AFK;            break;
-        case CMSG_MESSAGECHAT_DND:          type = CHAT_MSG_DND;            break;
-        case CMSG_MESSAGECHAT_EMOTE:        type = CHAT_MSG_EMOTE;          break;
-        case CMSG_MESSAGECHAT_PARTY:        type = CHAT_MSG_PARTY;          break;
-        case CMSG_MESSAGECHAT_RAID:         type = CHAT_MSG_RAID;           break;
-        case CMSG_MESSAGECHAT_BATTLEGROUND: type = CHAT_MSG_BATTLEGROUND;   break;
-        case CMSG_MESSAGECHAT_RAID_WARNING: type = CHAT_MSG_RAID_WARNING;   break;
+        case CMSG_CHAT_MESSAGE_SAY:          type = CHAT_MSG_SAY;            break;
+        case CMSG_CHAT_MESSAGE_YELL:         type = CHAT_MSG_YELL;           break;
+        case CMSG_CHAT_MESSAGE_CHANNEL:      type = CHAT_MSG_CHANNEL;        break;
+        case CMSG_CHAT_MESSAGE_WHISPER:      type = CHAT_MSG_WHISPER;        break;
+        case CMSG_CHAT_MESSAGE_GUILD:        type = CHAT_MSG_GUILD;          break;
+        case CMSG_CHAT_MESSAGE_OFFICER:      type = CHAT_MSG_OFFICER;        break;
+        case CMSG_CHAT_MESSAGE_AFK:          type = CHAT_MSG_AFK;            break;
+        case CMSG_CHAT_MESSAGE_DND:          type = CHAT_MSG_DND;            break;
+        case CMSG_CHAT_MESSAGE_EMOTE:        type = CHAT_MSG_EMOTE;          break;
+        case CMSG_CHAT_MESSAGE_PARTY:        type = CHAT_MSG_PARTY;          break;
+        case CMSG_CHAT_MESSAGE_RAID:         type = CHAT_MSG_RAID;           break;
+        case CMSG_CHAT_MESSAGE_INSTANCE_CHAT: type = CHAT_MSG_BATTLEGROUND;   break;
+        case CMSG_CHAT_MESSAGE_RAID_WARNING: type = CHAT_MSG_RAID_WARNING;   break;
         default:
             sLog.outError("HandleMessagechatOpcode : Unknown chat opcode (0x%X)", recv_data.GetOpcode());
             recv_data.rfinish();
@@ -537,12 +537,12 @@ void WorldSession::HandleAddonMessagechatOpcode(WorldPacket& recv_data)
 
     switch (recv_data.GetOpcode())
     {
-        case CMSG_MESSAGECHAT_ADDON_BATTLEGROUND:   type = CHAT_MSG_BATTLEGROUND;   break;
-        case CMSG_MESSAGECHAT_ADDON_GUILD:          type = CHAT_MSG_GUILD;          break;
-        case CMSG_MESSAGECHAT_ADDON_OFFICER:        type = CHAT_MSG_OFFICER;        break;
-        case CMSG_MESSAGECHAT_ADDON_PARTY:          type = CHAT_MSG_PARTY;          break;
-        case CMSG_MESSAGECHAT_ADDON_RAID:           type = CHAT_MSG_RAID;           break;
-        case CMSG_MESSAGECHAT_ADDON_WHISPER:        type = CHAT_MSG_WHISPER;        break;
+        case CMSG_CHAT_ADDON_MESSAGE_INSTANCE_CHAT:   type = CHAT_MSG_BATTLEGROUND;   break;
+        case CMSG_CHAT_ADDON_MESSAGE_GUILD:          type = CHAT_MSG_GUILD;          break;
+        case CMSG_CHAT_ADDON_MESSAGE_OFFICER:        type = CHAT_MSG_OFFICER;        break;
+        case CMSG_CHAT_ADDON_MESSAGE_PARTY:          type = CHAT_MSG_PARTY;          break;
+        case CMSG_CHAT_ADDON_MESSAGE_RAID:           type = CHAT_MSG_RAID;           break;
+        case CMSG_CHAT_ADDON_MESSAGE_WHISPER:        type = CHAT_MSG_WHISPER;        break;
         default:
             sLog.outError("HandleAddonMessagechatOpcode: Unknown addon chat opcode (0x%X)", recv_data.GetOpcode());
             recv_data.rfinish();
@@ -767,7 +767,7 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data)
 
 void WorldSession::SendPlayerNotFoundNotice(std::string name)
 {
-    WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, name.size() + 1);
+    WorldPacket data(SMSG_CHAT_PLAYER_NOTFOUND, name.size() + 1);
     data << name;
     SendPacket(&data);
 }
@@ -781,8 +781,9 @@ void WorldSession::SendPlayerAmbiguousNotice(std::string name)
 
 void WorldSession::SendWrongFactionNotice()
 {
-    WorldPacket data(SMSG_CHAT_WRONG_FACTION, 0);
-    SendPacket(&data);
+    // Verify
+    //WorldPacket data(SMSG_CHAT_WRONG_FACTION, 0);
+    //SendPacket(&data);
 }
 
 void WorldSession::SendChatRestrictedNotice(ChatRestrictionType restriction)

@@ -3260,9 +3260,9 @@ enum TrackedAuraType
 
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
-// will only support WoW, WoW:TBC, WoW:WotLK and WoW:Cataclysm 4.3.4 client build 15595...
+// will only support WoW 6.0.2 client build 18988...
 
-#define EXPECTED_MANGOSD_CLIENT_BUILD        {15595, 0}
+#define EXPECTED_MANGOSD_CLIENT_BUILD        {18988, 0}
 
 // max supported expansion level in mangosd
 // NOTE: not set it more that supported by targeted client version with all expansions installed
@@ -3275,9 +3275,11 @@ enum Expansions
     EXPANSION_TBC                       = 1,                // TBC
     EXPANSION_WOTLK                     = 2,                // WotLK
     EXPANSION_CATA                      = 3,                // Cataclysm
+    EXPANSION_MOP                       = 4,                // MoP
+    EXPANSION_WOD                       = 5,                // WoD
 };
 
-#define MAX_EXPANSION 3
+#define MAX_EXPANSION 5
 
 // Maxlevel for expansion
 enum MaxLevel
@@ -3286,12 +3288,14 @@ enum MaxLevel
     MAX_LEVEL_TBC                       = 70,
     MAX_LEVEL_WOTLK                     = 80,
     MAX_LEVEL_CATACLYSM                 = 85,
+    MAX_LEVEL_MOP                       = 90,
+    MAX_LEVEL_WOD                       = 100,
 };
 
-static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLASSIC, MAX_LEVEL_TBC, MAX_LEVEL_WOTLK, MAX_LEVEL_CATACLYSM };
+static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLASSIC, MAX_LEVEL_TBC, MAX_LEVEL_WOTLK, MAX_LEVEL_CATACLYSM, MAX_LEVEL_MOP, MAX_LEVEL_WOD };
 
 // Max creature level (included some bosses and elite)
-#define DEFAULT_MAX_CREATURE_LEVEL 90
+#define DEFAULT_MAX_CREATURE_LEVEL 100
 
 // This spell is used for general boarding serverside
 #define SPELL_RIDE_VEHICLE_HARDCODED    46598
