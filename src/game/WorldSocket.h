@@ -115,6 +115,7 @@ class WorldSocket : protected WorldHandler
         /// @param pct packet to send
         /// @return -1 of failure
         int SendPacket(const WorldPacket& pct);
+        int SendRawPacket(const WorldPacket& pct, uint16 size);
 
         /// Add reference to this object.
         long AddReference(void);
@@ -131,7 +132,7 @@ class WorldSocket : protected WorldHandler
         virtual ~WorldSocket(void);
 
         /// Called on open ,the void* is the acceptor.
-        int HandleWowConnection(WorldPacket& recvPacket);
+        int SendAuthChallenge();
 
         virtual int open(void*) override;
 
@@ -204,6 +205,7 @@ class WorldSocket : protected WorldHandler
 
         /// Fragment of the received header.
         ACE_Message_Block m_Header;
+        ACE_Message_Block m_AuthHeader;
 
         /// Mutex for protecting output related data.
         LockType m_OutBufferLock;
@@ -217,6 +219,7 @@ class WorldSocket : protected WorldHandler
         /// True if the socket is registered with the reactor for output
         bool m_OutActive;
 
+        bool m_transferInitiated[2];
         uint32 m_Seed;
 
         BigNumber m_s;

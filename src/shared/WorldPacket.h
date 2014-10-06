@@ -29,12 +29,22 @@ class WorldPacket : public ByteBuffer
 {
     public:
         // just container for later use
-        WorldPacket()                                       : ByteBuffer(0), m_opcode(MSG_NULL_ACTION)
+        WorldPacket() : ByteBuffer(0), m_opcode((Opcodes)MAX_OPCODE_TABLE_SIZE)
         {
         }
-        explicit WorldPacket(Opcodes opcode, size_t res = 200) : ByteBuffer(res), m_opcode(opcode) { }
+
+        WorldPacket(int32 res) : ByteBuffer(res), m_opcode((Opcodes)MAX_OPCODE_TABLE_SIZE)
+        {
+        }
+
+        // SMSG only
+        explicit WorldPacket(Opcodes opcode, size_t res = 200) : ByteBuffer(res), m_opcode(opcode), m_opcodeValue(serverOpcodeTable[opcode].value) { }
+
+        // CMSG only
+        explicit WorldPacket(uint16 opcode, size_t res = 200) : ByteBuffer(res), m_opcode(clientOpcodeTable[opcode].opcode), m_opcodeValue(opcode) { }
+        
         // copy constructor
-        WorldPacket(const WorldPacket& packet)              : ByteBuffer(packet), m_opcode(packet.m_opcode)
+        WorldPacket(const WorldPacket& packet) : ByteBuffer(packet), m_opcode(packet.m_opcode)
         {
         }
 
@@ -43,13 +53,23 @@ class WorldPacket : public ByteBuffer
             clear();
             _storage.reserve(newres);
             m_opcode = opcode;
+            m_opcodeValue = serverOpcodeTable[opcode].value;
         }
 
         Opcodes GetOpcode() const { return m_opcode; }
-        void SetOpcode(Opcodes opcode) { m_opcode = opcode; }
-        inline const char* GetOpcodeName() const { return LookupOpcodeName(m_opcode); }
+        uint16 GetOpcodeValue() const { return m_opcodeValue; }
+
+        void SetOpcode(Opcodes opcode)
+        {
+            m_opcode = opcode;
+            m_opcodeValue = serverOpcodeTable[opcode].value;
+        }
+
+        inline const char* GetServerOpcodeName() const { return LookupServerOpcodeName(m_opcode); }
+        inline const char* GetOpcodeName() const { return LookupOpcodeName(m_opcodeValue); }
 
     protected:
         Opcodes m_opcode;
+        uint16 m_opcodeValue;
 };
 #endif
